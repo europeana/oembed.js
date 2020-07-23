@@ -45,6 +45,6 @@
     "access": "public"
   },
   "bin": {
-    "europeana-oembed.js": "bin/europeana-oembed.js"
+    "europeana-oembed": "bin/europeana-oembed.js"
   }
 }
