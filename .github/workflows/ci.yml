@@ -12,6 +12,7 @@ on:
 env:
   EUROPEANA_RECORD_API_KEY: ${{ secrets.EUROPEANA_RECORD_API_KEY }}
 
+jobs:
   test:
     runs-on: ubuntu-latest
     steps:
