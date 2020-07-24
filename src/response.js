@@ -76,6 +76,7 @@ const response = (item, options = {}) => {
   const authorUrl = propertyValue('edmIsShownAt', providerAggregation);
 
   const thumbnailWidth = thumbnailWidthForMaxWidth(options.maxWidth);
+  const itemThumbnailUrl = thumbnailUrl(providerAggregation, thumbnailWidth);
   const itemRightsUrl = rightsUrl(providerAggregation);
   const type = typeForRights(itemRightsUrl);
 
@@ -92,8 +93,8 @@ const response = (item, options = {}) => {
     'provider_name': 'Europeana',
     'provider_url': providerUrl(item.about),
     'rights_url': itemRightsUrl,
-    'thumbnail_url': thumbnailUrl(providerAggregation, thumbnailWidth),
-    'thumbnail_width': thumbnailWidth
+    'thumbnail_url': itemThumbnailUrl,
+    'thumbnail_width': itemThumbnailUrl ? thumbnailWidth : null
   };
 
   return omitBy(response, isNull);
