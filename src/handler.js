@@ -26,7 +26,7 @@ module.exports = async(req, res) => {
       let recordApiResponse;
       try {
         recordApiResponse = await axios.get(
-          // TODO: switch to using JSON-LD format
+          // TODO: switch to using JSON-LD format?
           // TODO: or even use search.json which is much faster than record.json?
           `${constants.API_ORIGIN}/record${europeanaIdentifier}.json`,
           {
@@ -46,7 +46,9 @@ module.exports = async(req, res) => {
           };
         } else {
           status = 500;
-          response = error.message;
+          response = {
+            error: error.message
+          };
         }
       }
     } else {
