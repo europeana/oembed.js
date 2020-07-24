@@ -98,7 +98,7 @@ describe('response', () => {
               }
             ]
           };
-          
+
           it('should be an iframe with Europeana Media service as its source', () => {
             const expected = '<iframe src="https://embed.europeana.eu/123/abc"></iframe>';
 
@@ -109,7 +109,7 @@ describe('response', () => {
         });
       }
     });
-    
+
     context('when embedding is prohibited', () => {
       for (const rightsStatement of fixtures.rightsStatements.link) {
         context(`because edm:rights is "${rightsStatement}"`, () => {
@@ -125,7 +125,7 @@ describe('response', () => {
               }
             ]
           };
-          
+
           it('should be omitted', () => {
             const itemResponse = response(item);
 
