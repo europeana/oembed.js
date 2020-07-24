@@ -27,15 +27,17 @@ const rightsUrl = (providerAggregation) => {
     propertyValue('edmRights', providerAggregation);
 };
 
-// TODO: supply size based on maxWidth in request
 const thumbnailUrl = (providerAggregation, width) => {
   if (!providerAggregation.edmObject) return null;
 
   const url = new URL(`${constants.API_ORIGIN}/thumbnail/v2/url.json`);
+
   const params = new URLSearchParams();
   params.append('uri', providerAggregation.edmObject);
   params.append('size', `w${width}`);
+
   url.search = params.toString();
+
   return url.toString();
 };
 
