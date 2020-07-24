@@ -5,7 +5,6 @@ const constants = require('./constants');
 const europeanaRecordResponse = require('./response');
 
 // TODO: break down into more atomic functions
-// TODO: detect `format` param present and != "json", and return error
 module.exports = async(req, res) => {
   let status;
   let response;
