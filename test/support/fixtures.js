@@ -1,4 +1,20 @@
 module.exports = {
+  items: {
+    template: {
+      aggregations: [{ webResources: [] }],
+      proxies: [{ europeanaProxy: true }, { europeanaProxy: false }]
+    },
+    milkmaid: {
+      identifier: '/90402/SK_A_2344',
+      urls: [
+        'http://data.europeana.eu/item/90402/SK_A_2344',
+        'https://www.europeana.eu/item/90402/SK_A_2344',
+        'https://europeana.eu/item/90402/SK_A_2344',
+        'http://www.europeana.eu/item/90402/SK_A_2344',
+        'http://www.europeana.eu/de/item/90402/SK_A_2344'
+      ]
+    }
+  },
   rightsStatements: {
     rich: [
       'http://creativecommons.org/licenses/by-sa/4.0/',

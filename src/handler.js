@@ -47,6 +47,7 @@ module.exports = async(req, res) => {
 
           status = 200;
           response = europeanaRecordResponse(recordApiResponse.data.object);
+        // TODO: don't catch everything here, only API errors.
         } catch (error) {
           if (error.response) {
             status = error.response.status;
