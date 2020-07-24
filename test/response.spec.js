@@ -1,4 +1,6 @@
 const assert = require('assert');
+const fixtures = require('./support/fixtures');
+
 const response = require('../src/response');
 
 const itemTemplate = {
@@ -19,13 +21,56 @@ describe('response', () => {
   });
 
   describe('type', () => {
-    it('should be "rich"', () => {
-      const item = { ...itemTemplate };
-      const expected = 'rich';
+    context('when embedding is permitted', () => {
+      for (const rightsStatement of fixtures.rightsStatements.rich) {
+        context(`because edm:rights is "${rightsStatement}"`, () => {
+          const item = {
+            ...itemTemplate,
+            aggregations: [
+              {
+                edmRights: {
+                  def: [rightsStatement]
+                },
+                webResources: []
+              }
+            ]
+          };
 
-      const type = response(item).type;
+          it('should be "rich"', () => {
+            const expected = 'rich';
 
-      assert.equal(type, expected);
+            const type = response(item).type;
+
+            assert.equal(type, expected);
+          });
+        });
+      }
+    });
+
+    context('when embedding is prohibited', () => {
+      for (const rightsStatement of fixtures.rightsStatements.link) {
+        context(`because edm:rights is "${rightsStatement}"`, () => {
+          const item = {
+            ...itemTemplate,
+            aggregations: [
+              {
+                edmRights: {
+                  def: [rightsStatement]
+                },
+                webResources: []
+              }
+            ]
+          };
+
+          it('should be "link"', () => {
+            const expected = 'link';
+
+            const type = response(item).type;
+
+            assert.equal(type, expected);
+          });
+        });
+      }
     });
   });
 
@@ -38,13 +83,56 @@ describe('response', () => {
   });
 
   describe('html', () => {
-    it('should be an iframe with Europeana Media service as its source', () => {
-      const item = { ...itemTemplate, about: '/123/abc' };
-      const expected = '<iframe src="https://embed.europeana.eu/123/abc"></iframe>';
+    context('when embedding is permitted', () => {
+      for (const rightsStatement of fixtures.rightsStatements.rich) {
+        context(`because edm:rights is "${rightsStatement}"`, () => {
+          const item = {
+            ...itemTemplate,
+            about: '/123/abc',
+            aggregations: [
+              {
+                edmRights: {
+                  def: [rightsStatement]
+                },
+                webResources: []
+              }
+            ]
+          };
 
-      const html = response(item).html;
+          it('should be an iframe with Europeana Media service as its source', () => {
+            const expected = '<iframe src="https://embed.europeana.eu/123/abc"></iframe>';
 
-      assert.equal(html, expected);
+            const html = response(item).html;
+
+            assert.equal(html, expected);
+          });
+        });
+      }
+    });
+
+    context('when embedding is prohibited', () => {
+      for (const rightsStatement of fixtures.rightsStatements.link) {
+        context(`because edm:rights is "${rightsStatement}"`, () => {
+          const item = {
+            ...itemTemplate,
+            about: '/123/abc',
+            aggregations: [
+              {
+                edmRights: {
+                  def: [rightsStatement]
+                },
+                webResources: []
+              }
+            ]
+          };
+
+          it('should be omitted', () => {
+            const itemResponse = response(item);
+
+            assert(!Object.keys(itemResponse).includes('title'));
+          });
+        });
+      }
     });
   });
 
