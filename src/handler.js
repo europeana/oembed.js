@@ -32,7 +32,9 @@ module.exports = async(req, res) => {
       );
 
       status = 200;
-      response = europeanaRecordResponse(recordApiResponse.data.object);
+      response = europeanaRecordResponse(recordApiResponse.data.object, {
+        maxWidth: req.query.maxwidth
+      });
     } catch (error) {
       if (error.response) {
         status = error.response.status;
