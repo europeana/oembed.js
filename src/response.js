@@ -38,6 +38,26 @@ const thumbnailUrl = (providerAggregation) => {
   return url.toString();
 };
 
+const typeForRights = (rights) => {
+  if (!rights) return;
+
+  const embeddingPermittedRights = [
+    '://creativecommons.org/publicdomain/mark/',
+    '://creativecommons.org/publicdomain/zero/',
+    '://creativecommons.org/licenses/by/',
+    '://creativecommons.org/licenses/by-sa/'
+  ];
+
+  if (embeddingPermittedRights.some(permitted => rights.includes(permitted))) {
+    return 'rich';
+  }
+  return 'link';
+};
+
+const richHtml = (identifier) => {
+  return `<iframe src="${constants.EMBED_ORIGIN}${identifier}"></iframe>`;
+};
+
 const response = (item) => {
   const europeanaProxy = item.proxies.find(proxy => proxy.europeanaProxy);
   const providerProxy = item.proxies.find(proxy => !proxy.europeanaProxy);
@@ -48,19 +68,22 @@ const response = (item) => {
   const authorName = propertyValue('edmDataProvider', providerAggregation);
   const authorUrl = propertyValue('edmIsShownAt', providerAggregation);
 
+  const itemRightsUrl = rightsUrl(providerAggregation);
+  const type = typeForRights(itemRightsUrl);
+
   const response = {
     version: '1.0',
-    type: 'rich',
-    html: `<iframe src="${constants.EMBED_ORIGIN}${item.about}"></iframe>`,
-    // width: 640,
-    // height: 480,
+    type,
+    html: type === 'rich' ? richHtml(item.about) : null,
+    // width: type === 'rich' ? 640 : null,
+    // height: type === 'rich' ? 480 : null,
     title,
     description,
     'author_name': authorName,
     'author_url': authorUrl,
     'provider_name': 'Europeana',
     'provider_url': providerUrl(item.about),
-    'rights_url': rightsUrl(providerAggregation),
+    'rights_url': itemRightsUrl,
     'thumbnail_url': thumbnailUrl(providerAggregation)
     // 'thumbnail_width''
   };
