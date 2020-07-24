@@ -1,0 +1,11 @@
+# Cloud Foundry manifest
+---
+buildpack: nodejs_buildpack
+command: cservice --restartOnMemUsage 33554432 --cli false src/server.js
+memory: 128M
+health-check-type: process
+stack: cflinuxfs3
+env:
+  HOST: 0.0.0.0
+  NODE_ENV: production
+  OPTIMIZE_MEMORY: true
