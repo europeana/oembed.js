@@ -50,8 +50,8 @@ module.exports = async(req, res) => {
         }
       }
     } else {
-      status = 400;
-      response = { error: `Invalid URL: ${url}` };
+      status = 404;
+      response = { error: `Invalid url: ${url}` };
     }
   }
 
