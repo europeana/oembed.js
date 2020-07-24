@@ -75,11 +75,11 @@ describe('response', () => {
   });
 
   describe('width', () => {
-    it('should equal maxWidth request parameter');
+    it('should respect maxwidth request parameter');
   });
 
   describe('height', () => {
-    it('should equal maxHeight request parameter');
+    it('should respect maxheight request parameter');
   });
 
   describe('html', () => {
@@ -456,12 +456,10 @@ describe('response', () => {
     context('when edm:object is absent', () => {
       const item = { ...itemTemplate };
 
-      it('should be null', () => {
-        const expected = null;
+      it('should be omitted', () => {
+        const itemResponse = response(item);
 
-        const thumbnailUrl = response(item)['thumbnail_url'];
-
-        assert.equal(thumbnailUrl, expected);
+        assert(!Object.keys(itemResponse).includes('thumbnail_url'));
       });
     });
 
@@ -481,26 +479,110 @@ describe('response', () => {
 
         const thumbnailUrl = response(item)['thumbnail_url'];
 
-        assert.equal(thumbnailUrl, expected);
+        assert(thumbnailUrl.includes(expected));
       });
 
-      context('when maxwidth in request params <= 200', () => {
-        it('should have param size=w200');
-      });
+      describe('size', () => {
+        context('when maxWidth is present in options', () => {
+          context('and maxWidth <= 200', () => {
+            const options = { maxWidth: 150 };
 
-      context('when maxwidth in request params > 200', () => {
-        it('should have param size=w400');
+            it('should be "w200"', () => {
+              const expected = 'size=w200';
+
+              const thumbnailUrl = response(item, options)['thumbnail_url'];
+
+              assert(thumbnailUrl.includes(expected));
+            });
+          });
+
+          context('and maxWidth > 200', () => {
+            const options = { maxWidth: 500 };
+
+            it('should be "w400"', () => {
+              const expected = 'size=w400';
+
+              const thumbnailUrl = response(item, options)['thumbnail_url'];
+
+              assert(thumbnailUrl.includes(expected));
+            });
+          });
+        });
+
+        context('when maxWidth is absent from options', () => {
+          const options = { maxWidth: undefined };
+
+          it('should be "w200"', () => {
+            const expected = 'size=w200';
+
+            const thumbnailUrl = response(item, options)['thumbnail_url'];
+
+            assert(thumbnailUrl.includes(expected));
+          });
+        });
       });
     });
   });
 
   describe('thumbnail_width', () => {
-    context('when maxwidth in request params <= 200', () => {
-      it('should be 200');
+    context('when edm:object is absent', () => {
+      const item = { ...itemTemplate };
+
+      it('should be omitted', () => {
+        const itemResponse = response(item);
+
+        assert(!Object.keys(itemResponse).includes('thumbnail_width'));
+      });
     });
 
-    context('when maxwidth in request params > 200', () => {
-      it('should be 400');
+    context('when edm:object is present', () => {
+      const item = {
+        ...itemTemplate,
+        aggregations: [
+          {
+            edmObject: 'https://example.org/image.jpeg',
+            webResources: []
+          }
+        ]
+      };
+
+      context('when maxWidth is present in options', () => {
+        context('and maxWidth <= 200', () => {
+          const options = { maxWidth: 150 };
+
+          it('should be 200', () => {
+            const expected = 200;
+
+            const thumbnailWidth = response(item, options)['thumbnail_width'];
+
+            assert.equal(thumbnailWidth, expected);
+          });
+        });
+
+        context('and maxWidth > 200', () => {
+          const options = { maxWidth: 500 };
+
+          it('should be 400', () => {
+            const expected = 400;
+
+            const thumbnailWidth = response(item, options)['thumbnail_width'];
+
+            assert.equal(thumbnailWidth, expected);
+          });
+        });
+      });
+
+      context('when maxWidth is absent from options', () => {
+        const options = { maxWidth: undefined };
+
+        it('should be 200', () => {
+          const expected = 200;
+
+          const thumbnailWidth = response(item, options)['thumbnail_width'];
+
+          assert.equal(thumbnailWidth, expected);
+        });
+      });
     });
   });
 });
