@@ -25,37 +25,42 @@ module.exports = async(req, res) => {
   let response;
 
   const url = req.query.url;
-  const europeanaIdentifier = europeanaIdentifierFromUrl(url);
-  if (europeanaIdentifier) {
-    let recordApiResponse;
-    try {
-      recordApiResponse = await axios.get(
-        // TODO: switch to using JSON-LD format
-        // TODO: or even use search.json which is much faster than record.json?
-        `${constants.API_ORIGIN}/record${europeanaIdentifier}.json`,
-        {
-          params: {
-            wskey: config.europeana.recordApiKey
+  if (url) {
+    const europeanaIdentifier = europeanaIdentifierFromUrl(url);
+    if (europeanaIdentifier) {
+      let recordApiResponse;
+      try {
+        recordApiResponse = await axios.get(
+          // TODO: switch to using JSON-LD format
+          // TODO: or even use search.json which is much faster than record.json?
+          `${constants.API_ORIGIN}/record${europeanaIdentifier}.json`,
+          {
+            params: {
+              wskey: config.europeana.recordApiKey
+            }
           }
-        }
-      );
+        );
 
-      status = 200;
-      response = europeanaRecordResponse(recordApiResponse.data.object);
-    } catch (error) {
-      if (error.response) {
-        status = error.response.status;
-        response = {
-          error: error.response.data.error
-        };
-      } else {
-        status = 500;
-        response = error.message;
+        status = 200;
+        response = europeanaRecordResponse(recordApiResponse.data.object);
+      } catch (error) {
+        if (error.response) {
+          status = error.response.status;
+          response = {
+            error: error.response.data.error
+          };
+        } else {
+          status = 500;
+          response = error.message;
+        }
       }
+    } else {
+      status = 400;
+      response = { error: `Invalid URL: ${url}` };
     }
   } else {
     status = 400;
-    response = { error: `Invalid URL: ${url}` };
+    response = { error: 'url is required' };
   }
 
   res.status(status).json(response);
