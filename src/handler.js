@@ -19,48 +19,55 @@ const europeanaIdentifierFromUrl = (url) => {
 };
 
 // TODO: break down into more atomic functions
-// TODO: detect `format` param present and != "json", and return error
 module.exports = async(req, res) => {
   let status;
   let response;
 
-  const url = req.query.url;
-  if (url) {
-    const europeanaIdentifier = europeanaIdentifierFromUrl(url);
-    if (europeanaIdentifier) {
-      let recordApiResponse;
-      try {
-        recordApiResponse = await axios.get(
-          // TODO: switch to using JSON-LD format
-          // TODO: or even use search.json which is much faster than record.json?
-          `${constants.API_ORIGIN}/record${europeanaIdentifier}.json`,
-          {
-            params: {
-              wskey: config.europeana.recordApiKey
+  const format = req.query.format;
+  if (format && format !== 'json') {
+    status = 501;
+    response = { error: `Invalid format: ${format}` };
+  } else {
+    const url = req.query.url;
+    if (url) {
+      const europeanaIdentifier = europeanaIdentifierFromUrl(url);
+      if (europeanaIdentifier) {
+        let recordApiResponse;
+        try {
+          recordApiResponse = await axios.get(
+            // TODO: switch to using JSON-LD format?
+            // TODO: or even use search.json which is much faster than record.json?
+            `${constants.API_ORIGIN}/record${europeanaIdentifier}.json`,
+            {
+              params: {
+                wskey: config.europeana.recordApiKey
+              }
             }
-          }
-        );
+          );
 
-        status = 200;
-        response = europeanaRecordResponse(recordApiResponse.data.object);
-      } catch (error) {
-        if (error.response) {
-          status = error.response.status;
-          response = {
-            error: error.response.data.error
-          };
-        } else {
-          status = 500;
-          response = error.message;
+          status = 200;
+          response = europeanaRecordResponse(recordApiResponse.data.object);
+        } catch (error) {
+          if (error.response) {
+            status = error.response.status;
+            response = {
+              error: error.response.data.error
+            };
+          } else {
+            status = 500;
+            response = {
+              error: error.message
+            };
+          }
         }
+      } else {
+        status = 404;
+        response = { error: `Invalid url: ${url}` };
       }
     } else {
       status = 400;
-      response = { error: `Invalid URL: ${url}` };
+      response = { error: 'url is required' };
     }
-  } else {
-    status = 400;
-    response = { error: 'url is required' };
   }
 
   res.status(status).json(response);

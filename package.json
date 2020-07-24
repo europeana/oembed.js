@@ -5,9 +5,10 @@
   "main": "src/server.js",
   "scripts": {
     "lint": "eslint --ext .js --ignore-path .gitignore .",
+    "lint:fix": "npm run lint -- --fix",
     "start": "node src/server.js",
     "start:cluster": "cservice --cli false src/server.js",
-    "test": "mocha"
+    "test": "mocha test/**/*.spec.js"
   },
   "repository": {
     "type": "git",
@@ -39,7 +40,8 @@
   },
   "devDependencies": {
     "eslint": "^6.8.0",
-    "mocha": "^8.0.1"
+    "mocha": "^8.0.1",
+    "sinon": "^9.0.2"
   },
   "publishConfig": {
     "access": "public"
