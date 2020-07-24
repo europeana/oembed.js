@@ -4,6 +4,20 @@ const config = require('./config');
 const constants = require('./constants');
 const europeanaRecordResponse = require('./response');
 
+const europeanaIdentifierFromUrl = (url) => {
+  const patterns = [
+    // www.europeana.eu item page URLs
+    /^https?:\/\/(?:www\.)?europeana\.eu\/(?:[a-z]{2}\/)?item(\/[0-9]+\/[^/]+)$/,
+    // data.europeana.eu URIs
+    /^http:\/\/data\.europeana\.eu\/item(\/[0-9]+\/[^/]+)$/
+  ];
+  for (const pattern of patterns) {
+    const europeanaUriMatch = url.match(pattern);
+    if (europeanaUriMatch) return europeanaUriMatch[1];
+  }
+  return null;
+};
+
 // TODO: break down into more atomic functions
 // TODO: detect `format` param present and != "json", and return error
 module.exports = async(req, res) => {
@@ -11,13 +25,8 @@ module.exports = async(req, res) => {
   let response;
 
   const url = req.query.url;
-  // TODO: consider what other patterns this needs to accept.
-  //       see what youtube, soundcloud, vimeo, etc. do
-  const europeanaUriPattern = new RegExp('^http://data.europeana.eu/item(/[0-9]+/[a-zA-Z0-9_]+)$');
-  const europeanaUriMatch = url.match(europeanaUriPattern);
-  if (europeanaUriMatch) {
-    const europeanaIdentifier = europeanaUriMatch[1];
-
+  const europeanaIdentifier = europeanaIdentifierFromUrl(url);
+  if (europeanaIdentifier) {
     let recordApiResponse;
     try {
       recordApiResponse = await axios.get(
