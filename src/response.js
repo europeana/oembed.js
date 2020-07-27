@@ -27,14 +27,17 @@ const rightsUrl = (providerAggregation) => {
     propertyValue('edmRights', providerAggregation);
 };
 
-// TODO: supply size based on maxWidth in request
-const thumbnailUrl = (providerAggregation) => {
+const thumbnailUrl = (providerAggregation, width) => {
   if (!providerAggregation.edmObject) return null;
 
   const url = new URL(`${constants.API_ORIGIN}/thumbnail/v2/url.json`);
+
   const params = new URLSearchParams();
   params.append('uri', providerAggregation.edmObject);
+  params.append('size', `w${width}`);
+
   url.search = params.toString();
+
   return url.toString();
 };
 
@@ -58,7 +61,11 @@ const richHtml = (identifier) => {
   return `<iframe src="${constants.EMBED_ORIGIN}${identifier}"></iframe>`;
 };
 
-const response = (item) => {
+const thumbnailWidthForMaxWidth = (maxWidth) => {
+  return (maxWidth && Number(maxWidth) > 200) ? 400 : 200;
+};
+
+const response = (item, options = {}) => {
   const europeanaProxy = item.proxies.find(proxy => proxy.europeanaProxy);
   const providerProxy = item.proxies.find(proxy => !proxy.europeanaProxy);
   const providerAggregation = item.aggregations[0];
@@ -68,6 +75,8 @@ const response = (item) => {
   const authorName = propertyValue('edmDataProvider', providerAggregation);
   const authorUrl = propertyValue('edmIsShownAt', providerAggregation);
 
+  const thumbnailWidth = thumbnailWidthForMaxWidth(options.maxWidth);
+  const itemThumbnailUrl = thumbnailUrl(providerAggregation, thumbnailWidth);
   const itemRightsUrl = rightsUrl(providerAggregation);
   const type = typeForRights(itemRightsUrl);
 
@@ -84,8 +93,8 @@ const response = (item) => {
     'provider_name': 'Europeana',
     'provider_url': providerUrl(item.about),
     'rights_url': itemRightsUrl,
-    'thumbnail_url': thumbnailUrl(providerAggregation)
-    // 'thumbnail_width''
+    'thumbnail_url': itemThumbnailUrl,
+    'thumbnail_width': itemThumbnailUrl ? thumbnailWidth : null
   };
 
   return omitBy(response, isNull);
