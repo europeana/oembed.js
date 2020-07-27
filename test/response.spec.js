@@ -3,15 +3,10 @@ const fixtures = require('./support/fixtures');
 
 const response = require('../src/response');
 
-const itemTemplate = {
-  aggregations: [{ webResources: [] }],
-  proxies: [{ europeanaProxy: true }, { europeanaProxy: false }]
-};
-
 describe('response', () => {
   describe('version', () => {
     it('should be "1.0"', () => {
-      const item = { ...itemTemplate };
+      const item = { ...fixtures.items.template };
       const expected = '1.0';
 
       const version = response(item).version;
@@ -25,7 +20,7 @@ describe('response', () => {
       for (const rightsStatement of fixtures.rightsStatements.rich) {
         context(`because edm:rights is "${rightsStatement}"`, () => {
           const item = {
-            ...itemTemplate,
+            ...fixtures.items.template,
             aggregations: [
               {
                 edmRights: {
@@ -51,7 +46,7 @@ describe('response', () => {
       for (const rightsStatement of fixtures.rightsStatements.link) {
         context(`because edm:rights is "${rightsStatement}"`, () => {
           const item = {
-            ...itemTemplate,
+            ...fixtures.items.template,
             aggregations: [
               {
                 edmRights: {
@@ -87,7 +82,7 @@ describe('response', () => {
       for (const rightsStatement of fixtures.rightsStatements.rich) {
         context(`because edm:rights is "${rightsStatement}"`, () => {
           const item = {
-            ...itemTemplate,
+            ...fixtures.items.template,
             about: '/123/abc',
             aggregations: [
               {
@@ -114,7 +109,7 @@ describe('response', () => {
       for (const rightsStatement of fixtures.rightsStatements.link) {
         context(`because edm:rights is "${rightsStatement}"`, () => {
           const item = {
-            ...itemTemplate,
+            ...fixtures.items.template,
             about: '/123/abc',
             aggregations: [
               {
@@ -139,7 +134,7 @@ describe('response', () => {
   describe('title', () => {
     context('when Europeana proxy has title', () => {
       const item = {
-        ...itemTemplate,
+        ...fixtures.items.template,
         proxies: [
           {
             europeanaProxy: true,
@@ -168,7 +163,7 @@ describe('response', () => {
     context('when Europeana proxy lacks title', () => {
       context('when provider proxy has title', () => {
         const item = {
-          ...itemTemplate,
+          ...fixtures.items.template,
           proxies: [
             {
               europeanaProxy: true
@@ -193,7 +188,7 @@ describe('response', () => {
 
       context('when provider proxy lacks title', () => {
         const item = {
-          ...itemTemplate,
+          ...fixtures.items.template,
           proxies: [
             {
               europeanaProxy: true
@@ -216,7 +211,7 @@ describe('response', () => {
   describe('description', () => {
     context('when Europeana proxy has description', () => {
       const item = {
-        ...itemTemplate,
+        ...fixtures.items.template,
         proxies: [
           {
             europeanaProxy: true,
@@ -245,7 +240,7 @@ describe('response', () => {
     context('when Europeana proxy lacks description', () => {
       context('when provider proxy has description', () => {
         const item = {
-          ...itemTemplate,
+          ...fixtures.items.template,
           proxies: [
             {
               europeanaProxy: true
@@ -270,7 +265,7 @@ describe('response', () => {
 
       context('when provider proxy lacks description', () => {
         const item = {
-          ...itemTemplate,
+          ...fixtures.items.template,
           proxies: [
             {
               europeanaProxy: true
@@ -293,7 +288,7 @@ describe('response', () => {
   describe('author_name', () => {
     it('should be edm:dataProvider from the aggregation', () => {
       const item = {
-        ...itemTemplate,
+        ...fixtures.items.template,
         aggregations: [
           {
             edmDataProvider: {
@@ -314,7 +309,7 @@ describe('response', () => {
   describe('author_url', () => {
     context('when aggregation has edm:isShownAt', () => {
       const item = {
-        ...itemTemplate,
+        ...fixtures.items.template,
         aggregations: [
           {
             edmIsShownAt: 'https://www.example.org/123/abc',
@@ -333,7 +328,7 @@ describe('response', () => {
     });
 
     context('when aggregation lacks edm:isShownAt', () => {
-      const item = { ...itemTemplate };
+      const item = { ...fixtures.items.template };
 
       it('should be omitted', () => {
         const itemResponse = response(item);
@@ -345,7 +340,7 @@ describe('response', () => {
 
   describe('provider_name', () => {
     it('should be "Europeana"', () => {
-      const item = { ...itemTemplate };
+      const item = { ...fixtures.items.template };
       const expected = 'Europeana';
 
       const providerName = response(item)['provider_name'];
@@ -356,7 +351,7 @@ describe('response', () => {
 
   describe('provider_url', () => {
     it('should be a Europeana website item page URL', () => {
-      const item = { ...itemTemplate, about: '/123/abc' };
+      const item = { ...fixtures.items.template, about: '/123/abc' };
       const expected = 'https://www.europeana.eu/item/123/abc';
 
       const providerUrl = response(item)['provider_url'];
@@ -369,7 +364,7 @@ describe('response', () => {
     context('when edm:isShownBy is present', () => {
       context('and edm:isShownBy has edm:rights', () => {
         const item = {
-          ...itemTemplate,
+          ...fixtures.items.template,
           aggregations: [
             {
               edmIsShownBy: 'https://example.org/image.jpeg',
@@ -399,7 +394,7 @@ describe('response', () => {
 
       context('and edm:isShownBy lacks edm:rights', () => {
         const item = {
-          ...itemTemplate,
+          ...fixtures.items.template,
           aggregations: [
             {
               edmIsShownBy: 'https://example.org/image.jpeg',
@@ -427,7 +422,7 @@ describe('response', () => {
 
     context('when edm:isShownBy is absent', () => {
       const item = {
-        ...itemTemplate,
+        ...fixtures.items.template,
         aggregations: [
           {
             edmRights: {
@@ -454,7 +449,7 @@ describe('response', () => {
 
   describe('thumbnail_url', () => {
     context('when edm:object is absent', () => {
-      const item = { ...itemTemplate };
+      const item = { ...fixtures.items.template };
 
       it('should be omitted', () => {
         const itemResponse = response(item);
@@ -465,7 +460,7 @@ describe('response', () => {
 
     context('when edm:object is present', () => {
       const item = {
-        ...itemTemplate,
+        ...fixtures.items.template,
         aggregations: [
           {
             edmObject: 'https://example.org/image.jpeg',
@@ -526,7 +521,7 @@ describe('response', () => {
 
   describe('thumbnail_width', () => {
     context('when edm:object is absent', () => {
-      const item = { ...itemTemplate };
+      const item = { ...fixtures.items.template };
 
       it('should be omitted', () => {
         const itemResponse = response(item);
@@ -537,7 +532,7 @@ describe('response', () => {
 
     context('when edm:object is present', () => {
       const item = {
-        ...itemTemplate,
+        ...fixtures.items.template,
         aggregations: [
           {
             edmObject: 'https://example.org/image.jpeg',

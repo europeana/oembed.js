@@ -42,7 +42,7 @@ const thumbnailUrl = (providerAggregation, width) => {
 };
 
 const typeForRights = (rights) => {
-  if (!rights) return;
+  if (!rights) return 'link';
 
   const embeddingPermittedRights = [
     '://creativecommons.org/publicdomain/mark/',
