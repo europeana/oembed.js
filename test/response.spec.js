@@ -245,6 +245,48 @@ describe('response', () => {
     });
 
     describe('title', () => {
+      context('when language option is provided', () => {
+        const item = {
+          ...fixtures.items.template,
+          proxies: [
+            {
+              europeanaProxy: true
+            },
+            {
+              europeanaProxy: false,
+              dcTitle: {
+                en: ['Title in English'],
+                nl: ['Title in Dutch']
+              }
+            }
+          ]
+        };
+
+        context('and title is available in that language', () => {
+          const options = { language: 'nl' };
+
+          it('should use title in that language', () => {
+            const expected = 'Title in Dutch';
+
+            const title = response.item(item, options).title;
+
+            assert.equal(title, expected);
+          });
+        });
+
+        context('but title is unavailable in that language', () => {
+          const options = { language: 'de' };
+
+          it('should use the first title', () => {
+            const expected = 'Title in English';
+
+            const title = response.item(item, options).title;
+
+            assert.equal(title, expected);
+          });
+        });
+      });
+
       context('when Europeana proxy has title', () => {
         const item = {
           ...fixtures.items.template,
@@ -463,13 +505,26 @@ describe('response', () => {
     });
 
     describe('provider_url', () => {
+      const item = { ...fixtures.items.template, about: '/123/abc' };
+
       it('should be a Europeana website item page URL', () => {
-        const item = { ...fixtures.items.template, about: '/123/abc' };
         const expected = 'https://www.europeana.eu/item/123/abc';
 
         const providerUrl = response.item(item)['provider_url'];
 
         assert.equal(providerUrl, expected);
+      });
+
+      context('when language option is provided', () => {
+        const options = { language: 'fr' };
+
+        it('includes locale in URL', () => {
+          const expected = 'https://www.europeana.eu/fr/item/123/abc';
+
+          const providerUrl = response.item(item, options)['provider_url'];
+
+          assert.equal(providerUrl, expected);
+        });
       });
     });
 
