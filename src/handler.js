@@ -1,3 +1,7 @@
+/**
+ * Express route handler for oEmbed requests & responses
+ */
+
 const oEmbedResponseForEuropeanaIdentifier = require('./response').identifier;
 
 const responseForRequestQueryUrl = (url, options = {}) => {

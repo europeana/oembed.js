@@ -1,3 +1,7 @@
+/**
+ * Server to run Express app
+ */
+
 const config = require('./config');
 
 const app = require('./app');

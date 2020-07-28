@@ -1,3 +1,8 @@
+/**
+ * Europeana item oEmbed response generation
+ */
+// TODO: rename file to indicate Europeana item handling
+
 const axios = require('axios');
 const flatten = require('lodash.flatten');
 const omitBy = require('lodash.omitby');
