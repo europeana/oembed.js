@@ -14,5 +14,9 @@ module.exports = {
   europeana: {
     recordApiKey: process.env.EUROPEANA_RECORD_API_KEY
   },
+  iframe: {
+    width: process.env.IFRAME_DEFAULT_WIDTH ? Number(process.env.IFRAME_DEFAULT_WIDTH) : 400,
+    height: process.env.IFRAME_DEFAULT_HEIGHT ? Number(process.env.IFRAME_DEFAULT_HEIGHT) : 225
+  },
   port: process.env.PORT || 3000
 };

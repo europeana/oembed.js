@@ -47,7 +47,8 @@ module.exports = async(req, res) => {
 
           status = 200;
           response = europeanaRecordResponse(recordApiResponse.data.object, {
-            maxWidth: req.query.maxwidth
+            maxWidth: req.query.maxwidth ? Number(req.query.maxwidth) : undefined,
+            maxHeight: req.query.maxheight ? Number(req.query.maxheight) : undefined
           });
           // TODO: don't catch everything here, only API errors.
         } catch (error) {
