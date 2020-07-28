@@ -1,7 +1,9 @@
+const axios = require('axios');
 const flatten = require('lodash.flatten');
 const omitBy = require('lodash.omitby');
 const isNull = require('lodash.isnull');
 
+const config = require('./config');
 const constants = require('./constants');
 
 // TODO: i18n
@@ -65,7 +67,22 @@ const thumbnailWidthForMaxWidth = (maxWidth) => {
   return (maxWidth && Number(maxWidth) > 200) ? 400 : 200;
 };
 
-const response = (item, options = {}) => {
+const fetchItem = async(identifier) => {
+  const recordApiResponse = await axios.get(
+    `${constants.API_ORIGIN}/record${identifier}.json`, {
+      params: {
+        wskey: config.europeana.recordApiKey
+      }
+    });
+  return recordApiResponse.data.object;
+};
+
+const oEmbedResponseForIdentifier = async(identifier, options = {}) => {
+  const item = await fetchItem(identifier);
+  return oEmbedResponseForItem(item, options);
+};
+
+const oEmbedResponseForItem = (item, options = {}) => {
   const europeanaProxy = item.proxies.find(proxy => proxy.europeanaProxy);
   const providerProxy = item.proxies.find(proxy => !proxy.europeanaProxy);
   const providerAggregation = item.aggregations[0];
@@ -100,4 +117,7 @@ const response = (item, options = {}) => {
   return omitBy(response, isNull);
 };
 
-module.exports = response;
+module.exports = {
+  identifier: oEmbedResponseForIdentifier,
+  item: oEmbedResponseForItem
+};

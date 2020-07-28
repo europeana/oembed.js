@@ -1,20 +1,25 @@
-const axios = require('axios');
+const oEmbedResponseForEuropeanaIdentifier = require('./response').identifier;
 
-const config = require('./config');
-const constants = require('./constants');
-const europeanaRecordResponse = require('./response');
-
-const europeanaIdentifierFromUrl = (url) => {
-  const patterns = [
+const responseForRequestQueryUrl = (url, options = {}) => {
+  // TODO: move into response.js? (but renaming it to be Europeana item specific)
+  const patterns = {
     // www.europeana.eu item page URLs
-    /^https?:\/\/(?:www\.)?europeana\.eu\/(?:[a-z]{2}\/)?item(\/[0-9]+\/[^/]+)$/,
+    'https?://(?:www\\.)?europeana\\.eu/(([a-z]{2})/)?item(/[0-9]+/[^/]+)$': (match) => {
+      const identifier = match[3];
+      return oEmbedResponseForEuropeanaIdentifier(identifier, { ...options, language: match[2] });
+    },
     // data.europeana.eu URIs
-    /^http:\/\/data\.europeana\.eu\/item(\/[0-9]+\/[^/]+)$/
-  ];
-  for (const pattern of patterns) {
-    const europeanaUriMatch = url.match(pattern);
-    if (europeanaUriMatch) return europeanaUriMatch[1];
+    '^http://data\\.europeana\\.eu/item(/[0-9]+/[^/]+)$': (match) => {
+      const identifier = match[1];
+      return oEmbedResponseForEuropeanaIdentifier(identifier, options);
+    }
+  };
+
+  for (const pattern in patterns) {
+    const urlMatch = url.match(new RegExp(pattern));
+    if (urlMatch) return patterns[pattern](urlMatch);
   }
+
   return null;
 };
 
@@ -30,42 +35,30 @@ module.exports = async(req, res) => {
   } else {
     const url = req.query.url;
     if (url) {
-      const europeanaIdentifier = europeanaIdentifierFromUrl(url);
-      if (europeanaIdentifier) {
-        let recordApiResponse;
-        try {
-          recordApiResponse = await axios.get(
-            // TODO: switch to using JSON-LD format?
-            // TODO: or even use search.json which is much faster than record.json?
-            `${constants.API_ORIGIN}/record${europeanaIdentifier}.json`,
-            {
-              params: {
-                wskey: config.europeana.recordApiKey
-              }
-            }
-          );
+      try {
+        response = await responseForRequestQueryUrl(url, {
+          maxWidth: req.query.maxwidth
+        });
 
+        if (response) {
           status = 200;
-          response = europeanaRecordResponse(recordApiResponse.data.object, {
-            maxWidth: req.query.maxwidth
-          });
-          // TODO: don't catch everything here, only API errors.
-        } catch (error) {
-          if (error.response) {
-            status = error.response.status;
-            response = {
-              error: error.response.data.error
-            };
-          } else {
-            status = 500;
-            response = {
-              error: error.message
-            };
-          }
+        } else {
+          status = 404;
+          response = { error: `Invalid url: ${url}` };
         }
-      } else {
-        status = 404;
-        response = { error: `Invalid url: ${url}` };
+      // TODO: limit what is caught here, e.g. to axios errors, otherwise throw back up
+      } catch (error) {
+        if (error.response) {
+          status = error.response.status;
+          response = {
+            error: error.response.data.error
+          };
+        } else {
+          status = 500;
+          response = {
+            error: error.message
+          };
+        }
       }
     } else {
       status = 400;
