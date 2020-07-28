@@ -110,8 +110,8 @@ describe('handler', () => {
         context('but not a recognised Europeana item URL', () => {
           const req = { query: { url: 'http://example.org/item/abc' } };
 
-          specify('response status code is 501', () => {
-            handler(req, res);
+          specify('response status code is 404', async() => {
+            await handler(req, res);
 
             assert(res.status.calledOnce);
             const status = res.status.args[0][0];
@@ -119,8 +119,8 @@ describe('handler', () => {
             assert.equal(status, 404);
           });
 
-          specify('response body is JSON containing error message', () => {
-            handler(req, res);
+          specify('response body is JSON containing error message', async() => {
+            await handler(req, res);
 
             assert(res.json.calledOnce);
             const json = res.json.args[0][0];

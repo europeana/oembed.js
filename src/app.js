@@ -1,3 +1,7 @@
+/**
+ * Express app
+ */
+
 const config = require('./config');
 
 const elasticApmNode = require('elastic-apm-node');

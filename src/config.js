@@ -1,3 +1,7 @@
+/**
+ * Configuration read from environment
+ */
+
 require('dotenv').config();
 
 module.exports = {
