@@ -11,19 +11,26 @@ const isNull = require('lodash.isnull');
 const config = require('./config');
 const constants = require('./constants');
 
-// TODO: i18n
-const propertyValue = (propertyName, data) => {
+const propertyValue = (propertyName, data, language) => {
   if (!data || !data[propertyName]) return null;
 
-  const propertyValues = typeof data[propertyName] === 'string' ?
-    [data[propertyName]] : Object.values(data[propertyName]);
+  let propertyValues;
+  if (typeof data[propertyName] === 'string') {
+    propertyValues = [data[propertyName]];
+  // TODO: handle three-letter lang codes as property names on `data`
+  } else if (language && data[propertyName][language]) {
+    propertyValues = [data[propertyName][language]];
+  } else {
+    propertyValues = Object.values(data[propertyName]);
+  }
 
   return flatten(propertyValues)[0];
 };
 
-// TODO: i18n
-const providerUrl = (identifier) => {
-  return `${constants.WWW_ORIGIN}/item${identifier}`;
+const providerUrl = (identifier, language) => {
+  // TODO: should this check that language is in fact one supported by the portal UI?
+  const localePrefix = language ? `/${language}` : '';
+  return `${constants.WWW_ORIGIN}${localePrefix}/item${identifier}`;
 };
 
 const rightsUrl = (providerAggregation, edmIsShownByWebResource) => {
@@ -111,8 +118,10 @@ const oEmbedResponseForItem = (item, options = {}) => {
   const edmIsShownByWebResource = providerAggregation.webResources
     .find(webResource => webResource.about === providerAggregation.edmIsShownBy);
 
-  const title = propertyValue('dcTitle', europeanaProxy) || propertyValue('dcTitle', providerProxy);
-  const description = propertyValue('dcDescription', europeanaProxy) || propertyValue('dcDescription', providerProxy);
+  const title = propertyValue('dcTitle', europeanaProxy, options.language) ||
+    propertyValue('dcTitle', providerProxy, options.language);
+  const description = propertyValue('dcDescription', europeanaProxy, options.language)
+    || propertyValue('dcDescription', providerProxy, options.language);
   const authorName = propertyValue('edmDataProvider', providerAggregation);
   const authorUrl = propertyValue('edmIsShownAt', providerAggregation);
 
@@ -135,7 +144,7 @@ const oEmbedResponseForItem = (item, options = {}) => {
     'author_name': authorName,
     'author_url': authorUrl,
     'provider_name': 'Europeana',
-    'provider_url': providerUrl(item.about),
+    'provider_url': providerUrl(item.about, options.language),
     'rights_url': itemRightsUrl,
     'thumbnail_url': itemThumbnailUrl,
     'thumbnail_width': itemThumbnailUrl ? thumbnailWidth : null
