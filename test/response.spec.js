@@ -1,10 +1,11 @@
 const assert = require('assert');
 const fixtures = require('./support/fixtures');
+const { whenEmbeddingIsPermitted, whenEmbeddingIsProhibited } = require('./support/contexts');
 
 const response = require('../src/response');
 
 describe('response', () => {
-  describe('.identifier()', () => {
+  describe('.item()', () => {
     describe('version', () => {
       it('should be "1.0"', () => {
         const item = { ...fixtures.items.template };
@@ -17,118 +18,229 @@ describe('response', () => {
     });
 
     describe('type', () => {
-      context('when embedding is permitted', () => {
-        for (const rightsStatement of fixtures.rightsStatements.rich) {
-          context(`because edm:rights is "${rightsStatement}"`, () => {
-            const item = {
-              ...fixtures.items.template,
-              aggregations: [
-                {
-                  edmRights: {
-                    def: [rightsStatement]
-                  },
-                  webResources: []
-                }
-              ]
-            };
+      whenEmbeddingIsPermitted((rightsStatement) => {
+        const item = {
+          ...fixtures.items.template,
+          aggregations: [
+            {
+              edmRights: {
+                def: [rightsStatement]
+              },
+              webResources: []
+            }
+          ]
+        };
 
-            it('should be "rich"', () => {
-              const expected = 'rich';
+        it('should be "rich"', () => {
+          const expected = 'rich';
 
-              const type = response.item(item).type;
+          const type = response.item(item).type;
 
-              assert.equal(type, expected);
-            });
-          });
-        }
+          assert.equal(type, expected);
+        });
       });
 
-      context('when embedding is prohibited', () => {
-        for (const rightsStatement of fixtures.rightsStatements.link) {
-          context(`because edm:rights is "${rightsStatement}"`, () => {
-            const item = {
-              ...fixtures.items.template,
-              aggregations: [
-                {
-                  edmRights: {
-                    def: [rightsStatement]
-                  },
-                  webResources: []
-                }
-              ]
-            };
+      whenEmbeddingIsProhibited((rightsStatement) => {
+        const item = {
+          ...fixtures.items.template,
+          aggregations: [
+            {
+              edmRights: {
+                def: [rightsStatement]
+              },
+              webResources: []
+            }
+          ]
+        };
 
-            it('should be "link"', () => {
-              const expected = 'link';
+        it('should be "link"', () => {
+          const expected = 'link';
 
-              const type = response.item(item).type;
+          const type = response.item(item).type;
 
-              assert.equal(type, expected);
-            });
-          });
-        }
+          assert.equal(type, expected);
+        });
       });
-    });
-
-    describe('width', () => {
-      it('should respect maxwidth request parameter');
-    });
-
-    describe('height', () => {
-      it('should respect maxheight request parameter');
     });
 
     describe('html', () => {
-      context('when embedding is permitted', () => {
-        for (const rightsStatement of fixtures.rightsStatements.rich) {
-          context(`because edm:rights is "${rightsStatement}"`, () => {
+      describe('width', () => {
+        whenEmbeddingIsPermitted((rightsStatement) => {
+          const item = {
+            ...fixtures.items.template,
+            about: '/123/abc',
+            aggregations: [
+              {
+                edmRights: {
+                  def: [rightsStatement]
+                },
+                webResources: []
+              }
+            ]
+          };
+
+          it('should be an iframe with Europeana Media service as its source', () => {
+            const expected = /<iframe src="https:\/\/embed\.europeana\.eu\/123\/abc"[^>]+><\/iframe>/;
+
+            const html = response.item(item).html;
+
+            assert(expected.test(html));
+          });
+        });
+
+        whenEmbeddingIsProhibited((rightsStatement) => {
+          const item = {
+            ...fixtures.items.template,
+            about: '/123/abc',
+            aggregations: [
+              {
+                edmRights: {
+                  def: [rightsStatement]
+                },
+                webResources: []
+              }
+            ]
+          };
+
+          it('should be omitted', () => {
+            const itemResponse = response.item(item);
+
+            assert(!Object.keys(itemResponse).includes('html'));
+          });
+        });
+      });
+    });
+
+    describe('width / height', () => {
+      const assertWidthAndHeight = (response, expectedWidth, expectedHeight) => {
+        const width = response.width;
+        assert.equal(width, expectedWidth);
+
+        const height = response.height;
+        assert.equal(height, expectedHeight);
+      };
+
+      whenEmbeddingIsPermitted((rightsStatement) => {
+        context('and edm:isShownBy is present', () => {
+          context('with ebucore dimensions', () => {
             const item = {
               ...fixtures.items.template,
               about: '/123/abc',
               aggregations: [
                 {
+                  edmIsShownBy: 'https://example.org/image.jpeg',
                   edmRights: {
                     def: [rightsStatement]
                   },
-                  webResources: []
+                  webResources: [
+                    {
+                      about: 'https://example.org/image.jpeg',
+                      ebucoreWidth: 1200,
+                      ebucoreHeight: 900
+                    }
+                  ]
                 }
               ]
             };
 
-            it('should be an iframe with Europeana Media service as its source', () => {
-              const expected = '<iframe src="https://embed.europeana.eu/123/abc"></iframe>';
+            it('defaults to ebucore dimensions', () => {
+              assertWidthAndHeight(response.item(item), 1200, 900);
+            });
 
-              const html = response.item(item).html;
+            it('scales to fit maxWidth', () => {
+              assertWidthAndHeight(response.item(item, { maxWidth: 200, maxHeight: 225 }), 200, 150);
+            });
 
-              assert.equal(html, expected);
+            it('scales to fit maxHeight', () => {
+              assertWidthAndHeight(response.item(item, { maxWidth: 400, maxHeight: 100 }), 133, 100);
             });
           });
-        }
+
+          context('without ebucore dimensions', () => {
+            const item = {
+              ...fixtures.items.template,
+              about: '/123/abc',
+              aggregations: [
+                {
+                  edmIsShownBy: 'https://example.org/image.jpeg',
+                  edmRights: {
+                    def: [rightsStatement]
+                  },
+                  webResources: [
+                    {
+                      about: 'https://example.org/image.jpeg'
+                    }
+                  ]
+                }
+              ]
+            };
+
+            it('defaults to 400x225', () => {
+              assertWidthAndHeight(response.item(item), 400, 225);
+            });
+
+            it('scales to fit maxWidth', () => {
+              assertWidthAndHeight(response.item(item, { maxWidth: 200, maxHeight: 225 }), 200, 113);
+            });
+
+            it('scales to fit maxHeight', () => {
+              assertWidthAndHeight(response.item(item, { maxWidth: 400, maxHeight: 100 }), 178, 100);
+            });
+          });
+        });
+
+        context('but edm:isShownBy is absent', () => {
+          const item = {
+            ...fixtures.items.template,
+            about: '/123/abc',
+            aggregations: [
+              {
+                edmRights: {
+                  def: [rightsStatement]
+                },
+                webResources: []
+              }
+            ]
+          };
+
+          it('defaults to 400x225', () => {
+            assertWidthAndHeight(response.item(item), 400, 225);
+          });
+
+          it('scales to fit maxWidth', () => {
+            assertWidthAndHeight(response.item(item, { maxWidth: 200, maxHeight: 225 }), 200, 113);
+          });
+
+          it('scales to fit maxHeight', () => {
+            assertWidthAndHeight(response.item(item, { maxWidth: 400, maxHeight: 100 }), 178, 100);
+          });
+        });
       });
 
-      context('when embedding is prohibited', () => {
-        for (const rightsStatement of fixtures.rightsStatements.link) {
-          context(`because edm:rights is "${rightsStatement}"`, () => {
-            const item = {
-              ...fixtures.items.template,
-              about: '/123/abc',
-              aggregations: [
+      whenEmbeddingIsProhibited((rightsStatement) => {
+        const item = {
+          ...fixtures.items.template,
+          about: '/123/abc',
+          aggregations: [
+            {
+              edmIsShownBy: 'https://example.org/image.jpeg',
+              edmRights: {
+                def: [rightsStatement]
+              },
+              webResources: [
                 {
-                  edmRights: {
-                    def: [rightsStatement]
-                  },
-                  webResources: []
+                  about: 'https://example.org/image.jpeg'
                 }
               ]
-            };
+            }
+          ]
+        };
 
-            it('should be omitted', () => {
-              const itemResponse = response.item(item);
+        it('should be omitted', () => {
+          const itemResponse = response.item(item);
 
-              assert(!Object.keys(itemResponse).includes('title'));
-            });
-          });
-        }
+          assert(!Object.keys(itemResponse).includes('width'));
+        });
       });
     });
 

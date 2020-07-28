@@ -41,7 +41,8 @@ module.exports = async(req, res) => {
     if (url) {
       try {
         response = await responseForRequestQueryUrl(url, {
-          maxWidth: req.query.maxwidth
+          maxWidth: req.query.maxwidth ? Number(req.query.maxwidth) : undefined,
+          maxHeight: req.query.maxheight ? Number(req.query.maxheight) : undefined
         });
 
         if (response) {

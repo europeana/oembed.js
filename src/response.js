@@ -26,10 +26,7 @@ const providerUrl = (identifier) => {
   return `${constants.WWW_ORIGIN}/item${identifier}`;
 };
 
-const rightsUrl = (providerAggregation) => {
-  const edmIsShownByWebResource = providerAggregation.webResources
-    .find(webResource => webResource.about === providerAggregation.edmIsShownBy);
-
+const rightsUrl = (providerAggregation, edmIsShownByWebResource) => {
   return propertyValue('webResourceEdmRights', edmIsShownByWebResource) ||
     propertyValue('edmRights', providerAggregation);
 };
@@ -64,12 +61,32 @@ const typeForRights = (rights) => {
   return 'link';
 };
 
-const richHtml = (identifier) => {
-  return `<iframe src="${constants.EMBED_ORIGIN}${identifier}"></iframe>`;
+const richHtml = (identifier, { width, height }) => {
+  return `<iframe src="${constants.EMBED_ORIGIN}${identifier}" width="${width}" height="${height}"></iframe>`;
 };
 
 const thumbnailWidthForMaxWidth = (maxWidth) => {
-  return (maxWidth && Number(maxWidth) > 200) ? 400 : 200;
+  return (maxWidth && (maxWidth > 200)) ? 400 : 200;
+};
+
+const dimensionsForWebResourceDisplay = (webResource = {}, { maxWidth, maxHeight }) => {
+  const dimensions = (webResource.ebucoreWidth && webResource.ebucoreHeight) ?
+    {
+      width: webResource.ebucoreWidth,
+      height: webResource.ebucoreHeight
+    } : { ...config.iframe };
+
+  const ratio = dimensions.width / dimensions.height;
+  if (maxWidth && (dimensions.width > maxWidth)) {
+    dimensions.width = maxWidth;
+    dimensions.height = Math.round(maxWidth / ratio);
+  }
+  if (maxHeight && dimensions.height > maxHeight) {
+    dimensions.height = maxHeight;
+    dimensions.width = Math.round(maxHeight * ratio);
+  }
+
+  return dimensions;
 };
 
 const fetchItem = async(identifier) => {
@@ -91,6 +108,8 @@ const oEmbedResponseForItem = (item, options = {}) => {
   const europeanaProxy = item.proxies.find(proxy => proxy.europeanaProxy);
   const providerProxy = item.proxies.find(proxy => !proxy.europeanaProxy);
   const providerAggregation = item.aggregations[0];
+  const edmIsShownByWebResource = providerAggregation.webResources
+    .find(webResource => webResource.about === providerAggregation.edmIsShownBy);
 
   const title = propertyValue('dcTitle', europeanaProxy) || propertyValue('dcTitle', providerProxy);
   const description = propertyValue('dcDescription', europeanaProxy) || propertyValue('dcDescription', providerProxy);
@@ -99,15 +118,18 @@ const oEmbedResponseForItem = (item, options = {}) => {
 
   const thumbnailWidth = thumbnailWidthForMaxWidth(options.maxWidth);
   const itemThumbnailUrl = thumbnailUrl(providerAggregation, thumbnailWidth);
-  const itemRightsUrl = rightsUrl(providerAggregation);
+  const itemRightsUrl = rightsUrl(providerAggregation, edmIsShownByWebResource);
   const type = typeForRights(itemRightsUrl);
+
+  let dimensions;
+  if (type === 'rich') dimensions = dimensionsForWebResourceDisplay(edmIsShownByWebResource, options);
 
   const response = {
     version: '1.0',
     type,
-    html: type === 'rich' ? richHtml(item.about) : null,
-    // width: type === 'rich' ? 640 : null,
-    // height: type === 'rich' ? 480 : null,
+    html: type === 'rich' ? richHtml(item.about, dimensions) : null,
+    width: type === 'rich' ? dimensions.width : null,
+    height: type === 'rich' ? dimensions.height : null,
     title,
     description,
     'author_name': authorName,
