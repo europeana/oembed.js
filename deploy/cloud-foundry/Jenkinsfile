@@ -23,10 +23,10 @@ pipeline {
     }
     stage('Deploy to CF') {
       environment {
-        CF_APP_NAME="portaljs-api-proxy-cache${env.CF_SPACE == 'production' ? '' : '-' + env.CF_SPACE}"
+        CF_APP_NAME="oembedjs${env.CF_SPACE == 'production' ? '' : '-' + env.CF_SPACE}"
       }
       steps {
-        configFileProvider([configFile(fileId: "portaljs-api-proxy-cache.${env.CF_SPACE}.env", targetLocation: '.env')]) {
+        configFileProvider([configFile(fileId: "oembedjs.${env.CF_SPACE}.env", targetLocation: '.env')]) {
           sh 'cf blue-green-deploy ${CF_APP_NAME} -f deploy/cloud-foundry/manifest.yml --delete-old-apps'
         }
       }
