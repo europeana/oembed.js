@@ -33,8 +33,8 @@ const providerUrl = (identifier, language) => {
   return `${constants.WWW_ORIGIN}${localePrefix}/item${identifier}`;
 };
 
-const rightsUrl = (providerAggregation, edmIsShownByWebResource) => {
-  return propertyValue('webResourceEdmRights', edmIsShownByWebResource) ||
+const rightsUrl = (providerAggregation, webResource) => {
+  return propertyValue('webResourceEdmRights', webResource) ||
     propertyValue('edmRights', providerAggregation);
 };
 
@@ -115,15 +115,43 @@ const oEmbedResponseForIdentifier = async(identifier, options = {}) => {
   return oEmbedResponseForItem(item, options);
 };
 
+function sortByIsNextInSequence(source) {
+  // Make a copy to work on
+  const items = [].concat(source);
+
+  const itemUris = items.map((item) => item.about);
+
+  for (const uri of itemUris) {
+    // It's necessary to find the item on each iteration to sort as it may have
+    // been moved from its original position by a previous iteration.
+    const sortItemIndex = items.findIndex((item) => item.about === uri);
+    const sortItem = items[sortItemIndex];
+
+    // If it has isNextInSequence property, move it after that item; else
+    // leave it be.
+    if (sortItem.isNextInSequence) {
+      const isPreviousInSequenceIndex = items.findIndex((item) => item.about === sortItem.isNextInSequence);
+      if (isPreviousInSequenceIndex !== -1) {
+        // Remove the item from its original position.
+        items.splice(sortItemIndex, 1);
+        // Insert the item after its predecessor.
+        items.splice(isPreviousInSequenceIndex + 1, 0, sortItem);
+      }
+    }
+  }
+
+  return items;
+}
+
 const oEmbedResponseForItem = (item, options = {}) => {
   const europeanaProxy = item.proxies.find(proxy => proxy.europeanaProxy);
   const providerProxy = item.proxies.find(proxy => !proxy.europeanaProxy);
   const providerAggregation = item.aggregations[0];
 
-  // TODO: this should take the first hasView if no isShownBy, respecting
-  //       isNextInSequence references.
-  const edmIsShownByWebResource = providerAggregation.webResources
-    .find(webResource => webResource.about === providerAggregation.edmIsShownBy || webResource.about === providerAggregation.hasView);
+  const edmIsShownByOrAt = providerAggregation.edmIsShownBy || providerAggregation.edmIsShownAt;
+  const unsortedMedia = new Set([edmIsShownByOrAt].concat(providerAggregation.hasView || [])
+    .filter(media => media !== undefined));
+  const webResource = sortByIsNextInSequence(unsortedMedia)[0];
 
   const title = propertyValue('dcTitle', europeanaProxy, options.language) ||
     propertyValue('dcTitle', providerProxy, options.language);
@@ -134,14 +162,14 @@ const oEmbedResponseForItem = (item, options = {}) => {
 
   const thumbnailWidth = thumbnailWidthForMaxWidth(options.maxWidth);
   const itemThumbnailUrl = thumbnailUrl(providerAggregation, thumbnailWidth);
-  const itemRightsUrl = rightsUrl(providerAggregation, edmIsShownByWebResource);
+  const itemRightsUrl = rightsUrl(providerAggregation, webResource);
   const type = oEmbedType({
     rights: itemRightsUrl,
-    mediaType: edmIsShownByWebResource ? edmIsShownByWebResource.ebucoreHasMimeType : ''
+    mediaType: webResource.ebucoreHasMimeType
   });
 
   let dimensions;
-  if (type === 'rich') dimensions = dimensionsForWebResourceDisplay(edmIsShownByWebResource, options);
+  if (type === 'rich') dimensions = dimensionsForWebResourceDisplay(webResource, options);
 
   const response = {
     version: '1.0',
