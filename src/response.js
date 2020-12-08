@@ -52,9 +52,16 @@ const thumbnailUrl = (providerAggregation, width) => {
   return url.toString();
 };
 
-const typeForRights = (rights) => {
-  if (!rights) return 'link';
+const oEmbedType = ({ rights, mediaType }) => {
+  return embeddableMediaType(mediaType) && embeddableRights(rights) ? 'rich' : 'link';
+};
 
+const embeddableMediaType = (mediaType) => {
+  return (typeof mediaType === 'string') &&
+        ['audio', 'image', 'video'].includes(mediaType.split('/')[0]);
+};
+
+const embeddableRights = (rights) => {
   const embeddingPermittedRights = [
     '://creativecommons.org/publicdomain/mark/',
     '://creativecommons.org/publicdomain/zero/',
@@ -62,10 +69,7 @@ const typeForRights = (rights) => {
     '://creativecommons.org/licenses/by-sa/'
   ];
 
-  if (embeddingPermittedRights.some(permitted => rights.includes(permitted))) {
-    return 'rich';
-  }
-  return 'link';
+  return (embeddingPermittedRights.some(permitted => (rights || []).includes(permitted)));
 };
 
 const richHtml = (identifier, { width, height }) => {
@@ -115,8 +119,11 @@ const oEmbedResponseForItem = (item, options = {}) => {
   const europeanaProxy = item.proxies.find(proxy => proxy.europeanaProxy);
   const providerProxy = item.proxies.find(proxy => !proxy.europeanaProxy);
   const providerAggregation = item.aggregations[0];
+
+  // TODO: this should take the first hasView if no isShownBy, respecting
+  //       isNextInSequence references.
   const edmIsShownByWebResource = providerAggregation.webResources
-    .find(webResource => webResource.about === providerAggregation.edmIsShownBy);
+    .find(webResource => webResource.about === providerAggregation.edmIsShownBy || webResource.about === providerAggregation.hasView);
 
   const title = propertyValue('dcTitle', europeanaProxy, options.language) ||
     propertyValue('dcTitle', providerProxy, options.language);
@@ -128,7 +135,10 @@ const oEmbedResponseForItem = (item, options = {}) => {
   const thumbnailWidth = thumbnailWidthForMaxWidth(options.maxWidth);
   const itemThumbnailUrl = thumbnailUrl(providerAggregation, thumbnailWidth);
   const itemRightsUrl = rightsUrl(providerAggregation, edmIsShownByWebResource);
-  const type = typeForRights(itemRightsUrl);
+  const type = oEmbedType({
+    rights: itemRightsUrl,
+    mediaType: edmIsShownByWebResource ? edmIsShownByWebResource.ebucoreHasMimeType : ''
+  });
 
   let dimensions;
   if (type === 'rich') dimensions = dimensionsForWebResourceDisplay(edmIsShownByWebResource, options);
