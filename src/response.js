@@ -53,15 +53,15 @@ const thumbnailUrl = (providerAggregation, width) => {
 };
 
 const oEmbedType = ({ rights, mediaType }) => {
-  return embeddableMediaType(mediaType) && embeddableRights(rights) ? 'rich' : 'link';
+  return mediaTypeEmbeddable(mediaType) && embeddingPermitted(rights) ? 'rich' : 'link';
 };
 
-const embeddableMediaType = (mediaType) => {
+const mediaTypeEmbeddable = (mediaType) => {
   return (typeof mediaType === 'string') &&
         ['audio', 'image', 'video'].includes(mediaType.split('/')[0]);
 };
 
-const embeddableRights = (rights) => {
+const embeddingPermitted = (rights) => {
   const embeddingPermittedRights = [
     '://creativecommons.org/publicdomain/mark/',
     '://creativecommons.org/publicdomain/zero/',
