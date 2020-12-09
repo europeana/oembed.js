@@ -130,7 +130,8 @@ function sortByIsNextInSequence(source) {
     // If it has isNextInSequence property, move it after that item; else
     // leave it be.
     if (sortItem.isNextInSequence) {
-      const isPreviousInSequenceIndex = items.findIndex((item) => item.about === sortItem.isNextInSequence);
+      const isPreviousInSequenceIndex = items
+        .findIndex((item) => item.about === sortItem.isNextInSequence);
       if (isPreviousInSequenceIndex !== -1) {
         // Remove the item from its original position.
         items.splice(sortItemIndex, 1);
@@ -148,8 +149,8 @@ const oEmbedResponseForItem = (item, options = {}) => {
   const providerProxy = item.proxies.find(proxy => !proxy.europeanaProxy);
   const providerAggregation = item.aggregations[0];
 
-  const edmIsShownByOrAt = providerAggregation.edmIsShownBy || providerAggregation.edmIsShownAt;
-  const unsortedMedia = new Set([edmIsShownByOrAt].concat(providerAggregation.hasView || [])
+  const unsortedMedia = new Set([providerAggregation.edmIsShownBy]
+    .concat(providerAggregation.hasView || [])
     .filter(media => media !== undefined));
   const webResource = sortByIsNextInSequence(unsortedMedia)[0];
 
