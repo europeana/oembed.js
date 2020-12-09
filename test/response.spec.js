@@ -18,15 +18,19 @@ describe('response', () => {
     });
 
     describe('type', () => {
-      whenEmbeddingIsPermitted((rightsStatement) => {
+      whenEmbeddingIsPermitted((rightsStatement, mediaType) => {
         const item = {
           ...fixtures.items.template,
           aggregations: [
             {
+              edmIsShownBy: '',
               edmRights: {
                 def: [rightsStatement]
               },
-              webResources: []
+              webResources: [
+                { about: '',
+                  ebucoreHasMimeType: mediaType }
+              ]
             }
           ]
         };
@@ -40,15 +44,19 @@ describe('response', () => {
         });
       });
 
-      whenEmbeddingIsProhibited((rightsStatement) => {
+      whenEmbeddingIsProhibited((rightsStatement, mediaType) => {
         const item = {
           ...fixtures.items.template,
           aggregations: [
             {
+              edmIsShownBy: '',
               edmRights: {
                 def: [rightsStatement]
               },
-              webResources: []
+              webResources: [
+                { about: '',
+                  ebucoreHasMimeType: mediaType }
+              ]
             }
           ]
         };
@@ -65,16 +73,20 @@ describe('response', () => {
 
     describe('html', () => {
       describe('width', () => {
-        whenEmbeddingIsPermitted((rightsStatement) => {
+        whenEmbeddingIsPermitted((rightsStatement, mediaType) => {
           const item = {
             ...fixtures.items.template,
             about: '/123/abc',
             aggregations: [
               {
+                edmIsShownBy: '',
                 edmRights: {
                   def: [rightsStatement]
                 },
-                webResources: []
+                webResources: [
+                  { about: '',
+                    ebucoreHasMimeType: mediaType }
+                ]
               }
             ]
           };
@@ -88,16 +100,20 @@ describe('response', () => {
           });
         });
 
-        whenEmbeddingIsProhibited((rightsStatement) => {
+        whenEmbeddingIsProhibited((rightsStatement, mediaType) => {
           const item = {
             ...fixtures.items.template,
             about: '/123/abc',
             aggregations: [
               {
+                edmIsShownBy: '',
                 edmRights: {
                   def: [rightsStatement]
                 },
-                webResources: []
+                webResources: [
+                  { about: '',
+                    ebucoreHasMimeType: mediaType }
+                ]
               }
             ]
           };
@@ -120,7 +136,7 @@ describe('response', () => {
         assert.equal(height, expectedHeight);
       };
 
-      whenEmbeddingIsPermitted((rightsStatement) => {
+      whenEmbeddingIsPermitted((rightsStatement, mediaType) => {
         context('and edm:isShownBy is present', () => {
           context('with ebucore dimensions', () => {
             const item = {
@@ -136,7 +152,8 @@ describe('response', () => {
                     {
                       about: 'https://example.org/image.jpeg',
                       ebucoreWidth: 1200,
-                      ebucoreHeight: 900
+                      ebucoreHeight: 900,
+                      ebucoreHasMimeType: mediaType
                     }
                   ]
                 }
@@ -217,7 +234,7 @@ describe('response', () => {
         });
       });
 
-      whenEmbeddingIsProhibited((rightsStatement) => {
+      whenEmbeddingIsProhibited((rightsStatement, mediaType) => {
         const item = {
           ...fixtures.items.template,
           about: '/123/abc',
@@ -229,7 +246,8 @@ describe('response', () => {
               },
               webResources: [
                 {
-                  about: 'https://example.org/image.jpeg'
+                  about: 'https://example.org/image.jpeg',
+                  ebucoreHasMimeType: mediaType
                 }
               ]
             }

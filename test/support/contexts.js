@@ -3,9 +3,12 @@ const fixtures = require('./fixtures');
 const whenEmbeddingIsPermitted = (callback) => {
   context('when embedding is permitted', () => {
     for (const rightsStatement of fixtures.rightsStatements.rich) {
-      context(`because edm:rights is "${rightsStatement}"`, () => {
-        callback(rightsStatement);
-      });
+      for (const mediaType of fixtures.mediaTypes.supported) {
+        context(`because edm:rights is "${rightsStatement}" 
+      and ebucoreHasMimeType is "${mediaType}"`, () => {
+          callback(rightsStatement, mediaType);
+        });
+      }
     }
   });
 };
@@ -13,9 +16,12 @@ const whenEmbeddingIsPermitted = (callback) => {
 const whenEmbeddingIsProhibited = (callback) => {
   context('when embedding is prohibited', () => {
     for (const rightsStatement of fixtures.rightsStatements.link) {
-      context(`because edm:rights is "${rightsStatement}"`, () => {
-        callback(rightsStatement);
-      });
+      for (const mediaType of fixtures.mediaTypes.unsupported) {
+        context(`because edm:rights is "${rightsStatement}" 
+        and ebucoreHasMimeType is "${mediaType}"`, () => {
+          callback(rightsStatement, mediaType);
+        });
+      }
     }
   });
 };
