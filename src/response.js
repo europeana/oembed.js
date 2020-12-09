@@ -149,10 +149,16 @@ const oEmbedResponseForItem = (item, options = {}) => {
   const providerProxy = item.proxies.find(proxy => !proxy.europeanaProxy);
   const providerAggregation = item.aggregations[0];
 
-  const unsortedMedia = new Set([providerAggregation.edmIsShownBy]
+  const mediaUris = [providerAggregation.edmIsShownBy]
     .concat(providerAggregation.hasView || [])
-    .filter(media => media !== undefined));
-  const webResource = sortByIsNextInSequence(unsortedMedia)[0];
+    .filter(media => media !== undefined);
+
+  // Filter web resources to isShownBy and hasView, respecting the ordering
+  const media = providerAggregation.webResources.map(webResource =>
+    mediaUris.includes(webResource.about) ? webResource : undefined)
+    .filter(media => media !== undefined);
+
+  const webResource = sortByIsNextInSequence(media)[0];
 
   const title = propertyValue('dcTitle', europeanaProxy, options.language) ||
     propertyValue('dcTitle', providerProxy, options.language);
