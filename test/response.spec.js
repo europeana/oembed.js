@@ -185,7 +185,8 @@ describe('response', () => {
                   },
                   webResources: [
                     {
-                      about: 'https://example.org/image.jpeg'
+                      about: 'https://example.org/image.jpeg',
+                      ebucoreHasMimeType: mediaType
                     }
                   ]
                 }
@@ -206,7 +207,7 @@ describe('response', () => {
           });
         });
 
-        context('but edm:isShownBy is absent', () => {
+        context('and hasView is present, but edm:isShownBy is absent', () => {
           const item = {
             ...fixtures.items.template,
             about: '/123/abc',
@@ -215,7 +216,13 @@ describe('response', () => {
                 edmRights: {
                   def: [rightsStatement]
                 },
-                webResources: []
+                hasView: [''],
+                webResources: [
+                  {
+                    about: '',
+                    ebucoreHasMimeType: mediaType
+                  }
+                ]
               }
             ]
           };
@@ -467,7 +474,11 @@ describe('response', () => {
               edmDataProvider: {
                 def: ['Data Provider']
               },
-              webResources: []
+              edmIsShownBy: '',
+              webResources: [
+                { about: '',
+                  ebucoreHasMimeType: '' }
+              ]
             }
           ]
         };
@@ -486,7 +497,11 @@ describe('response', () => {
           aggregations: [
             {
               edmIsShownAt: 'https://www.example.org/123/abc',
-              webResources: []
+              edmIsShownBy: '',
+              webResources: [
+                { about: '',
+                  ebucoreHasMimeType: '' }
+              ]
             }
           ]
         };
@@ -606,14 +621,16 @@ describe('response', () => {
         });
       });
 
-      context('when edm:isShownBy is absent', () => {
+      context('when hasView is present, but edm:isShownBy is absent', () => {
         const item = {
           ...fixtures.items.template,
           aggregations: [
             {
+
               edmRights: {
                 def: ['http://creativecommons.org/licenses/by-sa/4.0/']
               },
+              hasView: ['https://example.org/image.jpeg'],
               webResources: [
                 {
                   about: 'https://example.org/image.jpeg'
@@ -650,7 +667,11 @@ describe('response', () => {
           aggregations: [
             {
               edmObject: 'https://example.org/image.jpeg',
-              webResources: []
+              edmIsShownBy: '',
+              webResources: [
+                { about: '',
+                  ebucoreHasMimeType: '' }
+              ]
             }
           ]
         };
@@ -722,7 +743,11 @@ describe('response', () => {
           aggregations: [
             {
               edmObject: 'https://example.org/image.jpeg',
-              webResources: []
+              edmIsShownBy: '',
+              webResources: [
+                { about: '',
+                  ebucoreHasMimeType: '' }
+              ]
             }
           ]
         };
