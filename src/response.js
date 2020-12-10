@@ -172,7 +172,8 @@ const oEmbedResponseForItem = (item, options = {}) => {
   const itemRightsUrl = rightsUrl(providerAggregation, webResource);
   const type = oEmbedType({
     rights: itemRightsUrl,
-    mediaType: webResource.ebucoreHasMimeType
+    // fallback in case no webResource (no isShownBy nor hasView)
+    mediaType: webResource ? webResource.ebucoreHasMimeType : ''
   });
 
   let dimensions;
