@@ -1,6 +1,6 @@
 const assert = require('assert');
 const fixtures = require('./support/fixtures');
-const { whenEmbeddingIsPermitted, whenEmbeddingIsProhibited } = require('./support/contexts');
+const { whenEmbeddingIsPermittedAndSupported, whenEmbeddingIsProhibitedOrUnsupported } = require('./support/contexts');
 
 const response = require('../src/response');
 
@@ -18,17 +18,17 @@ describe('response', () => {
     });
 
     describe('type', () => {
-      whenEmbeddingIsPermitted((rightsStatement, mediaType) => {
+      whenEmbeddingIsPermittedAndSupported((rightsStatement, mediaType, webResource) => {
         const item = {
           ...fixtures.items.template,
           aggregations: [
             {
-              edmIsShownBy: '',
+              edmIsShownBy: webResource,
               edmRights: {
                 def: [rightsStatement]
               },
               webResources: [
-                { about: '',
+                { about: webResource,
                   ebucoreHasMimeType: mediaType }
               ]
             }
@@ -44,17 +44,17 @@ describe('response', () => {
         });
       });
 
-      whenEmbeddingIsProhibited((rightsStatement, mediaType) => {
+      whenEmbeddingIsProhibitedOrUnsupported((rightsStatement, mediaType, webResource) => {
         const item = {
           ...fixtures.items.template,
           aggregations: [
             {
-              edmIsShownBy: '',
+              edmIsShownBy: webResource,
               edmRights: {
                 def: [rightsStatement]
               },
               webResources: [
-                { about: '',
+                { about: webResource,
                   ebucoreHasMimeType: mediaType }
               ]
             }
@@ -73,18 +73,18 @@ describe('response', () => {
 
     describe('html', () => {
       describe('width', () => {
-        whenEmbeddingIsPermitted((rightsStatement, mediaType) => {
+        whenEmbeddingIsPermittedAndSupported((rightsStatement, mediaType, webResource) => {
           const item = {
             ...fixtures.items.template,
             about: '/123/abc',
             aggregations: [
               {
-                edmIsShownBy: '',
+                edmIsShownBy: webResource,
                 edmRights: {
                   def: [rightsStatement]
                 },
                 webResources: [
-                  { about: '',
+                  { about: webResource,
                     ebucoreHasMimeType: mediaType }
                 ]
               }
@@ -100,18 +100,18 @@ describe('response', () => {
           });
         });
 
-        whenEmbeddingIsProhibited((rightsStatement, mediaType) => {
+        whenEmbeddingIsProhibitedOrUnsupported((rightsStatement, mediaType, webResource) => {
           const item = {
             ...fixtures.items.template,
             about: '/123/abc',
             aggregations: [
               {
-                edmIsShownBy: '',
+                edmIsShownBy: webResource,
                 edmRights: {
                   def: [rightsStatement]
                 },
                 webResources: [
-                  { about: '',
+                  { about: webResource,
                     ebucoreHasMimeType: mediaType }
                 ]
               }
@@ -136,7 +136,7 @@ describe('response', () => {
         assert.equal(height, expectedHeight);
       };
 
-      whenEmbeddingIsPermitted((rightsStatement, mediaType) => {
+      whenEmbeddingIsPermittedAndSupported((rightsStatement, mediaType, webResource) => {
         context('and edm:isShownBy is present', () => {
           context('with ebucore dimensions', () => {
             const item = {
@@ -144,13 +144,13 @@ describe('response', () => {
               about: '/123/abc',
               aggregations: [
                 {
-                  edmIsShownBy: 'https://example.org/image.jpeg',
+                  edmIsShownBy: webResource,
                   edmRights: {
                     def: [rightsStatement]
                   },
                   webResources: [
                     {
-                      about: 'https://example.org/image.jpeg',
+                      about: webResource,
                       ebucoreWidth: 1200,
                       ebucoreHeight: 900,
                       ebucoreHasMimeType: mediaType
@@ -216,10 +216,10 @@ describe('response', () => {
                 edmRights: {
                   def: [rightsStatement]
                 },
-                hasView: [''],
+                hasView: ['https://example.org/image.jpeg'],
                 webResources: [
                   {
-                    about: '',
+                    about: 'https://example.org/image.jpeg',
                     ebucoreHasMimeType: mediaType
                   }
                 ]
@@ -241,19 +241,19 @@ describe('response', () => {
         });
       });
 
-      whenEmbeddingIsProhibited((rightsStatement, mediaType) => {
+      whenEmbeddingIsProhibitedOrUnsupported((rightsStatement, mediaType, webResource) => {
         const item = {
           ...fixtures.items.template,
           about: '/123/abc',
           aggregations: [
             {
-              edmIsShownBy: 'https://example.org/image.jpeg',
+              edmIsShownBy: webResource,
               edmRights: {
                 def: [rightsStatement]
               },
               webResources: [
                 {
-                  about: 'https://example.org/image.jpeg',
+                  about: webResource,
                   ebucoreHasMimeType: mediaType
                 }
               ]
@@ -474,9 +474,9 @@ describe('response', () => {
               edmDataProvider: {
                 def: ['Data Provider']
               },
-              edmIsShownBy: '',
+              edmIsShownBy: 'https://example.org/image.jpeg',
               webResources: [
-                { about: '',
+                { about: 'https://example.org/image.jpeg',
                   ebucoreHasMimeType: '' }
               ]
             }
@@ -497,9 +497,9 @@ describe('response', () => {
           aggregations: [
             {
               edmIsShownAt: 'https://www.example.org/123/abc',
-              edmIsShownBy: '',
+              edmIsShownBy: 'https://example.org/image.jpeg',
               webResources: [
-                { about: '',
+                { about: 'https://example.org/image.jpeg',
                   ebucoreHasMimeType: '' }
               ]
             }
@@ -667,9 +667,9 @@ describe('response', () => {
           aggregations: [
             {
               edmObject: 'https://example.org/image.jpeg',
-              edmIsShownBy: '',
+              edmIsShownBy: 'https://example.org/image.jpeg',
               webResources: [
-                { about: '',
+                { about: 'https://example.org/image.jpeg',
                   ebucoreHasMimeType: '' }
               ]
             }
@@ -743,9 +743,9 @@ describe('response', () => {
           aggregations: [
             {
               edmObject: 'https://example.org/image.jpeg',
-              edmIsShownBy: '',
+              edmIsShownBy: 'https://example.org/image.jpeg',
               webResources: [
-                { about: '',
+                { about: 'https://example.org/image.jpeg',
                   ebucoreHasMimeType: '' }
               ]
             }

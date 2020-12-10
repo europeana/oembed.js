@@ -1,9 +1,9 @@
 module.exports = {
   items: {
     template: {
-      aggregations: [{ edmIsShownBy: '',
+      aggregations: [{ edmIsShownBy: 'https://example.org/image.jpeg',
         webResources: [
-          { about: '',
+          { about: 'https://example.org/image.jpeg',
             ebucoreHasMimeType: '' }
         ] }],
       proxies: [{ europeanaProxy: true }, { europeanaProxy: false }]
@@ -46,5 +46,6 @@ module.exports = {
     unsupported: [
       'text'
     ]
-  }
+  },
+  webResource: 'https://example.org/image.jpeg'
 };
