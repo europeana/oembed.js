@@ -56,7 +56,8 @@ const oEmbedType = ({ rights, mediaType }) => {
   return mediaTypeEmbeddable(mediaType) && embeddingPermitted(rights) ? 'rich' : 'link';
 };
 
-// Source logic: https://github.com/europeana/metis-framework/blob/v2.1/metis-common/src/main/java/eu/europeana/metis/utils/MediaType.java#L41-L64
+// Source logic: https://github.com/europeana/metis-framework/
+// blob/v2.1/metis-common/src/main/java/eu/europeana/metis/utils/MediaType.java#L41-L64
 const mediaTypeEmbeddable = (mediaType) => {
   return (typeof mediaType === 'string') &&
         (['audio', 'image', 'video'].includes(mediaType.split('/')[0]) || mediaType.startsWith('application/dash+xml'));
