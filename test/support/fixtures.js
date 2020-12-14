@@ -41,7 +41,8 @@ module.exports = {
     supported: [
       'image',
       'audio',
-      'video'
+      'video',
+      'application/dash+xml'
     ],
     unsupported: [
       'text'
