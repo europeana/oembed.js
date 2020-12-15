@@ -1,7 +1,11 @@
 module.exports = {
   items: {
     template: {
-      aggregations: [{ webResources: [] }],
+      aggregations: [{ edmIsShownBy: 'https://example.org/image.jpeg',
+        webResources: [
+          { about: 'https://example.org/image.jpeg',
+            ebucoreHasMimeType: '' }
+        ] }],
       proxies: [{ europeanaProxy: true }, { europeanaProxy: false }]
     },
     milkmaid: {
@@ -32,5 +36,17 @@ module.exports = {
       'http://rightsstatements.org/vocab/NoC-NC/1.0/',
       'http://rightsstatements.org/vocab/NoC-OKLR/1.0/'
     ]
-  }
+  },
+  mediaTypes: {
+    supported: [
+      'image/jpeg',
+      'audio/flac',
+      'video/mp4',
+      'application/dash+xml'
+    ],
+    unsupported: [
+      'text'
+    ]
+  },
+  webResource: 'https://example.org/image.jpeg'
 };

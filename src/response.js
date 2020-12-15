@@ -33,8 +33,8 @@ const providerUrl = (identifier, language) => {
   return `${constants.WWW_ORIGIN}${localePrefix}/item${identifier}`;
 };
 
-const rightsUrl = (providerAggregation, edmIsShownByWebResource) => {
-  return propertyValue('webResourceEdmRights', edmIsShownByWebResource) ||
+const rightsUrl = (providerAggregation, webResource) => {
+  return propertyValue('webResourceEdmRights', webResource) ||
     propertyValue('edmRights', providerAggregation);
 };
 
@@ -52,9 +52,18 @@ const thumbnailUrl = (providerAggregation, width) => {
   return url.toString();
 };
 
-const typeForRights = (rights) => {
-  if (!rights) return 'link';
+const oEmbedType = ({ rights, mediaType }) => {
+  return mediaTypeEmbeddable(mediaType) && embeddingPermitted(rights) ? 'rich' : 'link';
+};
 
+// eslint-disable-next-line max-len
+// Source logic: https://github.com/europeana/metis-framework/blob/v2.1/metis-common/src/main/java/eu/europeana/metis/utils/MediaType.java#L41-L64
+const mediaTypeEmbeddable = (mediaType) => {
+  return (typeof mediaType === 'string') &&
+    ['audio/', 'image/', 'video/', 'application/dash+xml'].some(prefix => mediaType.startsWith(prefix));
+};
+
+const embeddingPermitted = (rights) => {
   const embeddingPermittedRights = [
     '://creativecommons.org/publicdomain/mark/',
     '://creativecommons.org/publicdomain/zero/',
@@ -62,10 +71,7 @@ const typeForRights = (rights) => {
     '://creativecommons.org/licenses/by-sa/'
   ];
 
-  if (embeddingPermittedRights.some(permitted => rights.includes(permitted))) {
-    return 'rich';
-  }
-  return 'link';
+  return (embeddingPermittedRights.some(permitted => (rights || []).includes(permitted)));
 };
 
 const richHtml = (identifier, { width, height }) => {
@@ -111,12 +117,50 @@ const oEmbedResponseForIdentifier = async(identifier, options = {}) => {
   return oEmbedResponseForItem(item, options);
 };
 
+function sortByIsNextInSequence(source) {
+  // Make a copy to work on
+  const items = [].concat(source);
+
+  const itemUris = items.map((item) => item.about);
+
+  for (const uri of itemUris) {
+    // It's necessary to find the item on each iteration to sort as it may have
+    // been moved from its original position by a previous iteration.
+    const sortItemIndex = items.findIndex((item) => item.about === uri);
+    const sortItem = items[sortItemIndex];
+
+    // If it has isNextInSequence property, move it after that item; else
+    // leave it be.
+    if (sortItem.isNextInSequence) {
+      const isPreviousInSequenceIndex = items
+        .findIndex((item) => item.about === sortItem.isNextInSequence);
+      if (isPreviousInSequenceIndex !== -1) {
+        // Remove the item from its original position.
+        items.splice(sortItemIndex, 1);
+        // Insert the item after its predecessor.
+        items.splice(isPreviousInSequenceIndex + 1, 0, sortItem);
+      }
+    }
+  }
+
+  return items;
+}
+
 const oEmbedResponseForItem = (item, options = {}) => {
   const europeanaProxy = item.proxies.find(proxy => proxy.europeanaProxy);
   const providerProxy = item.proxies.find(proxy => !proxy.europeanaProxy);
   const providerAggregation = item.aggregations[0];
-  const edmIsShownByWebResource = providerAggregation.webResources
-    .find(webResource => webResource.about === providerAggregation.edmIsShownBy);
+
+  const mediaUris = [providerAggregation.edmIsShownBy]
+    .concat(providerAggregation.hasView || [])
+    .filter(media => media !== undefined);
+
+  // Filter web resources to isShownBy and hasView, respecting the ordering
+  const media = providerAggregation.webResources.map(webResource =>
+    mediaUris.includes(webResource.about) ? webResource : undefined)
+    .filter(media => media !== undefined);
+
+  const webResource = sortByIsNextInSequence(media)[0];
 
   const title = propertyValue('dcTitle', europeanaProxy, options.language) ||
     propertyValue('dcTitle', providerProxy, options.language);
@@ -127,11 +171,15 @@ const oEmbedResponseForItem = (item, options = {}) => {
 
   const thumbnailWidth = thumbnailWidthForMaxWidth(options.maxWidth);
   const itemThumbnailUrl = thumbnailUrl(providerAggregation, thumbnailWidth);
-  const itemRightsUrl = rightsUrl(providerAggregation, edmIsShownByWebResource);
-  const type = typeForRights(itemRightsUrl);
+  const itemRightsUrl = rightsUrl(providerAggregation, webResource);
+  const type = oEmbedType({
+    rights: itemRightsUrl,
+    // fallback in case no webResource (no isShownBy nor hasView)
+    mediaType: webResource ? webResource.ebucoreHasMimeType : ''
+  });
 
   let dimensions;
-  if (type === 'rich') dimensions = dimensionsForWebResourceDisplay(edmIsShownByWebResource, options);
+  if (type === 'rich') dimensions = dimensionsForWebResourceDisplay(webResource, options);
 
   const response = {
     version: '1.0',
