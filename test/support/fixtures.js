@@ -39,9 +39,9 @@ module.exports = {
   },
   mediaTypes: {
     supported: [
-      'image',
-      'audio',
-      'video',
+      'image/jpeg',
+      'audio/flac',
+      'video/mp4',
       'application/dash+xml'
     ],
     unsupported: [
