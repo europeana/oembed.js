@@ -1,5 +1,9 @@
 # Europeana oEmbed.js
 
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=europeana_oembed.js&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=europeana_oembed.js)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=europeana_oembed.js&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=europeana_oembed.js)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=europeana_oembed.js&metric=security_rating)](https://sonarcloud.io/dashboard?id=europeana_oembed.js)
+
 Europeana oEmbed provider service as an [Express](https://expressjs.com/) web
 app.
 
