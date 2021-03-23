@@ -12,7 +12,9 @@ const config = require('./config');
 const constants = require('./constants');
 
 const propertyValue = (propertyName, data, language) => {
-  if (!data || !data[propertyName]) return null;
+  if (!data || !data[propertyName]) {
+    return null;
+  }
 
   let propertyValues;
   if (typeof data[propertyName] === 'string') {
@@ -39,7 +41,9 @@ const rightsUrl = (providerAggregation, webResource) => {
 };
 
 const thumbnailUrl = (providerAggregation, width) => {
-  if (!providerAggregation.edmObject) return null;
+  if (!providerAggregation.edmObject) {
+    return null;
+  }
 
   const url = new URL(`${constants.API_ORIGIN}/thumbnail/v2/url.json`);
 
@@ -179,7 +183,9 @@ const oEmbedResponseForItem = (item, options = {}) => {
   });
 
   let dimensions;
-  if (type === 'rich') dimensions = dimensionsForWebResourceDisplay(webResource, options);
+  if (type === 'rich') {
+    dimensions = dimensionsForWebResourceDisplay(webResource, options);
+  }
 
   const response = {
     version: '1.0',

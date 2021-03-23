@@ -21,7 +21,9 @@ const responseForRequestQueryUrl = (url, options = {}) => {
 
   for (const pattern in patterns) {
     const urlMatch = url.match(new RegExp(pattern));
-    if (urlMatch) return patterns[pattern](urlMatch);
+    if (urlMatch) {
+      return patterns[pattern](urlMatch);
+    }
   }
 
   return null;

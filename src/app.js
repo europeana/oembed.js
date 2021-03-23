@@ -12,7 +12,9 @@ const elasticApmOptions = {
   serviceName: 'oembedjs',
   serviceVersion: require('../package').version
 };
-if (elasticApmOptions.serverUrl) elasticApmNode.start(elasticApmOptions);
+if (elasticApmOptions.serverUrl) {
+  elasticApmNode.start(elasticApmOptions);
+}
 
 const express = require('express');
 const morgan = require('morgan');
@@ -23,9 +25,15 @@ const handler = require('./handler');
 
 const app = express();
 
-if (config.enable.cors) app.use(cors());
-if (config.enable.compression) app.use(compression());
-if (config.enable.logging) app.use(morgan('combined'));
+if (config.enable.cors) {
+  app.use(cors());
+}
+if (config.enable.compression) {
+  app.use(compression());
+}
+if (config.enable.logging) {
+  app.use(morgan('combined'));
+}
 
 app.get('/', handler);
 
