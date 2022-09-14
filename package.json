@@ -21,8 +21,8 @@
   },
   "homepage": "https://github.com/europeana/oembed.js#readme",
   "engines": {
-    "node": "^12",
-    "npm": "^6"
+    "node": "^16",
+    "npm": "^8"
   },
   "dependencies": {
     "axios": "^0.19.2",
