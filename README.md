@@ -14,16 +14,8 @@ adapt for your environment.
 
 ## Run
 
-### Single process
-
 ```
 npm run start
-```
-
-### Cluster
-
-```
-npm run start:cluster
 ```
 
 ## NPM
