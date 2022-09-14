@@ -1,13 +1,28 @@
-FROM node:12-alpine
+FROM node:16-alpine AS build
 
 ENV NODE_ENV=production
-ENV PORT=8080
-ENV HOST=0.0.0.0
 
 WORKDIR /app
 
+COPY package* ./
+
+RUN npm ci
+
 COPY . .
 
-RUN npm install
 
-ENTRYPOINT ["npm", "run", "start"]
+FROM gcr.io/distroless/nodejs:16
+
+ENV NODE_ENV=production \
+    PORT=8080 \
+    HOST=0.0.0.0
+
+EXPOSE ${PORT}
+
+WORKDIR /app
+
+COPY --from=build /app .
+
+USER 1000
+
+CMD ["src/server.js"]
