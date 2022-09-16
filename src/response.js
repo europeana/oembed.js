@@ -3,13 +3,13 @@
  */
 // TODO: rename file to indicate Europeana item handling
 
-const axios = require('axios');
-const flatten = require('lodash.flatten');
-const omitBy = require('lodash.omitby');
-const isNull = require('lodash.isnull');
+import axios from 'axios';
+import flatten from 'lodash.flatten';
+import omitBy from 'lodash.omitby';
+import isNull from 'lodash.isnull';
 
-const config = require('./config');
-const constants = require('./constants');
+import config from './config.js';
+import constants from './constants.js';
 
 const propertyValue = (propertyName, data, language) => {
   if (!data || !data[propertyName]) {
@@ -207,7 +207,7 @@ const oEmbedResponseForItem = (item, options = {}) => {
   return omitBy(response, isNull);
 };
 
-module.exports = {
+export default {
   identifier: oEmbedResponseForIdentifier,
   item: oEmbedResponseForItem
 };

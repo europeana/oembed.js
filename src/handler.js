@@ -2,7 +2,7 @@
  * Express route handler for oEmbed requests & responses
  */
 
-const oEmbedResponseForEuropeanaIdentifier = require('./response').identifier;
+import oEmbedResponseForEuropeana from './response.js';
 
 const responseForRequestQueryUrl = (url, options = {}) => {
   // TODO: move into response.js? (but renaming it to be Europeana item specific)
@@ -10,12 +10,12 @@ const responseForRequestQueryUrl = (url, options = {}) => {
     // www.europeana.eu item page URLs
     'https?://(?:www\\.)?europeana\\.eu/(([a-z]{2})/)?item(/[0-9]+/[^/]+)$': (match) => {
       const identifier = match[3];
-      return oEmbedResponseForEuropeanaIdentifier(identifier, { ...options, language: match[2] });
+      return oEmbedResponseForEuropeana.identifier(identifier, { ...options, language: match[2] });
     },
     // data.europeana.eu URIs
     '^http://data\\.europeana\\.eu/item(/[0-9]+/[^/]+)$': (match) => {
       const identifier = match[1];
-      return oEmbedResponseForEuropeanaIdentifier(identifier, options);
+      return oEmbedResponseForEuropeana.identifier(identifier, options);
     }
   };
 
@@ -30,7 +30,7 @@ const responseForRequestQueryUrl = (url, options = {}) => {
 };
 
 // TODO: break down into more atomic functions
-module.exports = async(req, res) => {
+export default async(req, res) => {
   let status;
   let response;
 

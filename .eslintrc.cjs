@@ -4,10 +4,16 @@ module.exports = {
     es6: true,
     node: true
   },
+  parser: '@babel/eslint-parser',
   parserOptions: {
-    parser: 'babel-eslint',
-    ecmaVersion: 2018,
-    sourceType: 'module'
+    requireConfigFile: false,
+    ecmaVersion: 2022,
+    sourceType: 'module',
+    babelOptions: {
+      plugins: [
+        '@babel/plugin-syntax-import-assertions'
+      ]
+    }
   },
   extends: [
     'eslint:recommended'

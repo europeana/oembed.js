@@ -2,9 +2,10 @@
  * Configuration read from environment
  */
 
-require('dotenv').config();
+import * as dotenv from 'dotenv';
+dotenv.config();
 
-module.exports = {
+export default {
   elasticApm: {
     environment: process.env.ELASTIC_APM_ENVIRONMENT || 'development',
     logLevel: process.env.ELASTIC_APM_LOG_LEVEL || 'info',

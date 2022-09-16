@@ -1,8 +1,8 @@
-const assert = require('assert');
-const fixtures = require('./support/fixtures');
-const { whenEmbeddingIsPermittedAndSupported, whenEmbeddingIsProhibitedOrUnsupported } = require('./support/contexts');
+import assert from 'assert';
+import fixtures from './support/fixtures.js';
+import { whenEmbeddingIsPermittedAndSupported, whenEmbeddingIsProhibitedOrUnsupported } from './support/contexts.js';
 
-const response = require('../src/response');
+import response from '../src/response.js';
 
 describe('response', () => {
   describe('.item()', () => {

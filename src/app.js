@@ -2,26 +2,29 @@
  * Express app
  */
 
-const config = require('./config');
+import elasticApmNode from 'elastic-apm-node';
+import express from 'express';
+import morgan from 'morgan';
+import cors from 'cors';
+import compression from 'compression';
 
-const elasticApmNode = require('elastic-apm-node');
+import config from './config.js';
+import handler from './handler.js';
+
+import packageLock from '../package-lock.json' assert { type: 'json' };
+const frameworkVersion = packageLock.packages['node_modules/express'].version;
+const serviceVersion = packageLock.version;
+
 const elasticApmOptions = {
   ...config.elasticApm,
   frameworkName: 'Express.js',
-  frameworkVersion: require('express/package.json').version,
+  frameworkVersion,
   serviceName: 'oembedjs',
-  serviceVersion: require('../package').version
+  serviceVersion
 };
 if (elasticApmOptions.serverUrl) {
   elasticApmNode.start(elasticApmOptions);
 }
-
-const express = require('express');
-const morgan = require('morgan');
-const cors = require('cors');
-const compression = require('compression');
-
-const handler = require('./handler');
 
 const app = express();
 
@@ -37,4 +40,4 @@ if (config.enable.logging) {
 
 app.get('/', handler);
 
-module.exports = app;
+export default app;

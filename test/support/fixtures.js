@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   items: {
     template: {
       aggregations: [{ edmIsShownBy: 'https://example.org/image.jpeg',
