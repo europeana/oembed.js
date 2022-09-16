@@ -1,10 +1,10 @@
-const assert = require('assert');
-const sinon = require('sinon');
-const nock = require('nock');
+import assert from 'assert';
+import sinon from 'sinon';
+import nock from 'nock';
 
-const fixtures = require('./support/fixtures');
+import fixtures from './support/fixtures.js';
 
-const handler = require('../src/handler');
+import handler from '../src/handler.js';
 
 const res = {
   json: sinon.stub().returnsThis(),

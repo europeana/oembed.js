@@ -2,9 +2,9 @@
  * Server to run Express app
  */
 
-const config = require('./config');
+import config from './config.js';
 
-const app = require('./app');
+import app from './app.js';
 
 const server = app.listen(config.port, () => {
   console.log('Listening on port ' + server.address().port);
