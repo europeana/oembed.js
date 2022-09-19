@@ -13,9 +13,14 @@ export default async(url, { query = {} } = {}) => {
     return null;
   }
 
+  const options = {
+    maxWidth: query.maxwidth ? Number(query.maxwidth) : undefined,
+    maxHeight: query.maxheight ? Number(query.maxheight) : undefined
+  };
+
   const response = {
     version: '1.0',
-    ...(typeof provider.response === 'function' ? await provider.response(url, query) : provider.response)
+    ...(typeof provider.response === 'function' ? await provider.response(url, options) : provider.response)
   };
 
   if (!Object.keys(response).includes('html')) {

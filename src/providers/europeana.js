@@ -78,11 +78,11 @@ const embeddingPermitted = (rights) => {
   return (embeddingPermittedRights.some(permitted => (rights || []).includes(permitted)));
 };
 
-const thumbnailWidthForMaxWidth = (maxwidth) => {
-  return (maxwidth && (maxwidth > 200)) ? 400 : 200;
+const thumbnailWidthForMaxWidth = (maxWidth) => {
+  return (maxWidth && (maxWidth > 200)) ? 400 : 200;
 };
 
-const dimensionsForWebResourceDisplay = (webResource = {}, { maxwidth, maxheight }) => {
+const dimensionsForWebResourceDisplay = (webResource = {}, { maxWidth, maxHeight }) => {
   const dimensions = (webResource.ebucoreWidth && webResource.ebucoreHeight) ?
     {
       width: webResource.ebucoreWidth,
@@ -90,13 +90,13 @@ const dimensionsForWebResourceDisplay = (webResource = {}, { maxwidth, maxheight
     } : { ...config.iframe };
 
   const ratio = dimensions.width / dimensions.height;
-  if (maxwidth && (dimensions.width > maxwidth)) {
-    dimensions.width = maxwidth;
-    dimensions.height = Math.round(maxwidth / ratio);
+  if (maxWidth && (dimensions.width > maxWidth)) {
+    dimensions.width = maxWidth;
+    dimensions.height = Math.round(maxWidth / ratio);
   }
-  if (maxheight && dimensions.height > maxheight) {
-    dimensions.height = maxheight;
-    dimensions.width = Math.round(maxheight * ratio);
+  if (maxHeight && dimensions.height > maxHeight) {
+    dimensions.height = maxHeight;
+    dimensions.width = Math.round(maxHeight * ratio);
   }
 
   return dimensions;
@@ -171,7 +171,7 @@ const oEmbedResponseForItem = (item, options = {}) => {
   const authorName = propertyValue('edmDataProvider', providerAggregation);
   const authorUrl = propertyValue('edmIsShownAt', providerAggregation);
 
-  const thumbnailWidth = thumbnailWidthForMaxWidth(options.maxwidth);
+  const thumbnailWidth = thumbnailWidthForMaxWidth(options.maxWidth);
   const itemThumbnailUrl = thumbnailUrl(providerAggregation, thumbnailWidth);
   const itemRightsUrl = rightsUrl(providerAggregation, webResource);
   const type = oEmbedType({

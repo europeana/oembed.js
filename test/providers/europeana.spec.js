@@ -178,12 +178,12 @@ describe('providers/europeana', () => {
               assertWidthAndHeight(await europeanaResponse(item), 1200, 900);
             });
 
-            it('scales to fit maxwidth', async() => {
-              assertWidthAndHeight(await europeanaResponse(item, { maxwidth: 200, maxheight: 225 }), 200, 150);
+            it('scales to fit maxWidth', async() => {
+              assertWidthAndHeight(await europeanaResponse(item, { maxWidth: 200, maxHeight: 225 }), 200, 150);
             });
 
-            it('scales to fit maxheight', async() => {
-              assertWidthAndHeight(await europeanaResponse(item, { maxwidth: 400, maxheight: 100 }), 133, 100);
+            it('scales to fit maxHeight', async() => {
+              assertWidthAndHeight(await europeanaResponse(item, { maxWidth: 400, maxHeight: 100 }), 133, 100);
             });
           });
 
@@ -211,12 +211,12 @@ describe('providers/europeana', () => {
               assertWidthAndHeight(await europeanaResponse(item), 400, 225);
             });
 
-            it('scales to fit maxwidth', async() => {
-              assertWidthAndHeight(await europeanaResponse(item, { maxwidth: 200, maxheight: 225 }), 200, 113);
+            it('scales to fit maxWidth', async() => {
+              assertWidthAndHeight(await europeanaResponse(item, { maxWidth: 200, maxHeight: 225 }), 200, 113);
             });
 
-            it('scales to fit maxheight', async() => {
-              assertWidthAndHeight(await europeanaResponse(item, { maxwidth: 400, maxheight: 100 }), 178, 100);
+            it('scales to fit maxHeight', async() => {
+              assertWidthAndHeight(await europeanaResponse(item, { maxWidth: 400, maxHeight: 100 }), 178, 100);
             });
           });
         });
@@ -245,12 +245,12 @@ describe('providers/europeana', () => {
             assertWidthAndHeight(await europeanaResponse(item), 400, 225);
           });
 
-          it('scales to fit maxwidth', async() => {
-            assertWidthAndHeight(await europeanaResponse(item, { maxwidth: 200, maxheight: 225 }), 200, 113);
+          it('scales to fit maxWidth', async() => {
+            assertWidthAndHeight(await europeanaResponse(item, { maxWidth: 200, maxHeight: 225 }), 200, 113);
           });
 
-          it('scales to fit maxheight', async() => {
-            assertWidthAndHeight(await europeanaResponse(item, { maxwidth: 400, maxheight: 100 }), 178, 100);
+          it('scales to fit maxHeight', async() => {
+            assertWidthAndHeight(await europeanaResponse(item, { maxWidth: 400, maxHeight: 100 }), 178, 100);
           });
         });
       });
@@ -699,9 +699,9 @@ describe('providers/europeana', () => {
         });
 
         describe('size', () => {
-          context('when maxwidth is present in options', () => {
-            context('and maxwidth <= 200', () => {
-              const options = { maxwidth: 150 };
+          context('when maxWidth is present in options', () => {
+            context('and maxWidth <= 200', () => {
+              const options = { maxWidth: 150 };
 
               it('should be "w200"', async() => {
                 const expected = 'size=w200';
@@ -712,8 +712,8 @@ describe('providers/europeana', () => {
               });
             });
 
-            context('and maxwidth > 200', () => {
-              const options = { maxwidth: 500 };
+            context('and maxWidth > 200', () => {
+              const options = { maxWidth: 500 };
 
               it('should be "w400"', async() => {
                 const expected = 'size=w400';
@@ -725,8 +725,8 @@ describe('providers/europeana', () => {
             });
           });
 
-          context('when maxwidth is absent from options', () => {
-            const options = { maxwidth: undefined };
+          context('when maxWidth is absent from options', () => {
+            const options = { maxWidth: undefined };
 
             it('should be "w200"', async() => {
               const expected = 'size=w200';
@@ -766,9 +766,9 @@ describe('providers/europeana', () => {
           ]
         };
 
-        context('when maxwidth is present in options', () => {
-          context('and maxwidth <= 200', () => {
-            const options = { maxwidth: 150 };
+        context('when maxWidth is present in options', () => {
+          context('and maxWidth <= 200', () => {
+            const options = { maxWidth: 150 };
 
             it('should be 200', async() => {
               const expected = 200;
@@ -779,8 +779,8 @@ describe('providers/europeana', () => {
             });
           });
 
-          context('and maxwidth > 200', () => {
-            const options = { maxwidth: 500 };
+          context('and maxWidth > 200', () => {
+            const options = { maxWidth: 500 };
 
             it('should be 400', async() => {
               const expected = 400;
@@ -792,8 +792,8 @@ describe('providers/europeana', () => {
           });
         });
 
-        context('when maxwidth is absent from options', () => {
-          const options = { maxwidth: undefined };
+        context('when maxWidth is absent from options', () => {
+          const options = { maxWidth: undefined };
 
           it('should be 200', async() => {
             const expected = 200;
