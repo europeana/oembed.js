@@ -4,7 +4,7 @@ import isNull from 'lodash.isnull';
 import findProvider from './providers/index.js';
 
 export const responseHtml = ({ src, width, height }) => {
-  return `<iframe src="${src}" width="${width}" height="${height}"></iframe>`;
+  return `<iframe src="${src}" width="${width}" height="${height}" frameborder="0"></iframe>`;
 };
 
 export default async(url, { query = {} } = {}) => {
