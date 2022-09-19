@@ -19,6 +19,8 @@ describe('providers', () => {
     });
   });
 
+  // TODO: spec Europeana schemes
+
   describe('Ina.fr', () => {
     specify('recognises scheme http://www.ina.fr/video/*', () => {
       const provider = findProvider('http://www.ina.fr/video/I07337664/');
@@ -27,7 +29,9 @@ describe('providers', () => {
     });
 
     specify('recognises scheme http://www.ina.fr/*/video/*', () => {
-      const provider = findProvider('http://www.ina.fr/politique/elections-et-scrutins/video/CAB92011596/liste-daniel-hechter.fr.html#xtor=AL-3');
+      const provider = findProvider(
+        'http://www.ina.fr/politique/elections-et-scrutins/video/CAB92011596/liste-daniel-hechter.fr.html#xtor=AL-3'
+      );
 
       assert.equal(provider.response.providerName, 'Ina.fr');
     });
