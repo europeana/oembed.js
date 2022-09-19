@@ -2,51 +2,24 @@
  * Express route handler for oEmbed requests & responses
  */
 
-import oEmbedResponseForEuropeana from './response.js';
+import oembedResponse from './response.js';
 
-const responseForRequestQueryUrl = (url, options = {}) => {
-  // TODO: move into response.js? (but renaming it to be Europeana item specific)
-  const patterns = {
-    // www.europeana.eu item page URLs
-    'https?://(?:www\\.)?europeana\\.eu/(([a-z]{2})/)?item(/[0-9]+/[^/]+)$': (match) => {
-      const identifier = match[3];
-      return oEmbedResponseForEuropeana.identifier(identifier, { ...options, language: match[2] });
-    },
-    // data.europeana.eu URIs
-    '^http://data\\.europeana\\.eu/item(/[0-9]+/[^/]+)$': (match) => {
-      const identifier = match[1];
-      return oEmbedResponseForEuropeana.identifier(identifier, options);
-    }
-  };
-
-  for (const pattern in patterns) {
-    const urlMatch = url.match(new RegExp(pattern));
-    if (urlMatch) {
-      return patterns[pattern](urlMatch);
-    }
-  }
-
-  return null;
-};
+const errorResponse = (error) => ({ error });
 
 // TODO: break down into more atomic functions
-export default async(req, res) => {
+export default async({ query }, res) => {
   let status;
   let response;
 
-  const format = req.query.format;
+  const format = query.format;
   if (format && format !== 'json') {
     status = 501;
     response = { error: `Invalid format: ${format}` };
   } else {
-    const url = req.query.url;
+    const url = query.url;
     if (url) {
       try {
-        response = await responseForRequestQueryUrl(url, {
-          maxWidth: req.query.maxwidth ? Number(req.query.maxwidth) : undefined,
-          maxHeight: req.query.maxheight ? Number(req.query.maxheight) : undefined
-        });
-
+        response = await oembedResponse(url, { query });
         if (response) {
           status = 200;
         } else {
@@ -56,20 +29,16 @@ export default async(req, res) => {
       // TODO: limit what is caught here, e.g. to axios errors, otherwise throw back up
       } catch (error) {
         if (error.response) {
-          status = error.response.status;
-          response = {
-            error: error.response.data.error
-          };
+          status = error.response.status || 500;
+          response = errorResponse(error.response.data.error || error.message);
         } else {
           status = 500;
-          response = {
-            error: error.message
-          };
+          response = errorResponse(error.message);
         }
       }
     } else {
       status = 400;
-      response = { error: 'url is required' };
+      response = errorResponse('url is required');
     }
   }
 

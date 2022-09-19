@@ -1,6 +1,7 @@
 export default {
   items: {
     template: {
+      about: '/123/abc',
       aggregations: [{ edmIsShownBy: 'https://example.org/image.jpeg',
         webResources: [
           { about: 'https://example.org/image.jpeg',

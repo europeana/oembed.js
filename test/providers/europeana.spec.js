@@ -1,21 +1,35 @@
 import assert from 'assert';
-import fixtures from './support/fixtures.js';
-import { whenEmbeddingIsPermittedAndSupported, whenEmbeddingIsProhibitedOrUnsupported } from './support/contexts.js';
+import nock from 'nock';
 
-import response from '../src/response.js';
+import fixtures from '../support/fixtures.js';
+import { whenEmbeddingIsPermittedAndSupported, whenEmbeddingIsProhibitedOrUnsupported } from '../support/contexts.js';
 
-describe('response', () => {
-  describe('.item()', () => {
-    describe('version', () => {
-      it('should be "1.0"', () => {
-        const item = { ...fixtures.items.template };
-        const expected = '1.0';
+import provider from '../../src/providers/europeana.js';
 
-        const version = response.item(item).version;
+describe('providers/europeana', () => {
+  before(() => {
+    nock.disableNetConnect();
+  });
+  after(() => {
+    nock.enableNetConnect();
+  });
 
-        assert.equal(version, expected);
-      });
-    });
+  describe('response', () => {
+    const europeanaResponse = (item, options = {}) => {
+      nock('https://api.europeana.eu')
+        .get(`/record${item.about}.json`)
+        .query(true)
+        .reply(200, { object: item });
+
+      let url;
+      if (options.language) {
+        url = `https://www.europeana.eu/${options.language}/item${item.about}`;
+      } else {
+        url = `http://data.europeana.eu${item.about}`;
+      }
+
+      return provider.response(url, options);
+    };
 
     describe('type', () => {
       whenEmbeddingIsPermittedAndSupported((rightsStatement, mediaType, webResource) => {
@@ -35,12 +49,12 @@ describe('response', () => {
           ]
         };
 
-        it('should be "rich"', () => {
+        it('should be "rich"', async() => {
           const expected = 'rich';
 
-          const type = response.item(item).type;
+          const response = await europeanaResponse(item);
 
-          assert.equal(type, expected);
+          assert.equal(response.type, expected);
         });
       });
 
@@ -61,12 +75,12 @@ describe('response', () => {
           ]
         };
 
-        it('should be "link"', () => {
+        it('should be "link"', async() => {
           const expected = 'link';
 
-          const type = response.item(item).type;
+          const response = await europeanaResponse(item);
 
-          assert.equal(type, expected);
+          assert.equal(response.type, expected);
         });
       });
     });
@@ -91,12 +105,12 @@ describe('response', () => {
             ]
           };
 
-          it('should be an iframe with Europeana Media service as its source', () => {
+          it('should be an iframe with Europeana Media service as its source', async() => {
             const expected = /<iframe src="https:\/\/embed\.europeana\.eu\/123\/abc"[^>]+><\/iframe>/;
 
-            const html = response.item(item).html;
+            const response = await europeanaResponse(item);
 
-            assert(expected.test(html));
+            assert(expected.test(response.html));
           });
         });
 
@@ -118,10 +132,10 @@ describe('response', () => {
             ]
           };
 
-          it('should be omitted', () => {
-            const itemResponse = response.item(item);
+          it('should be null', async() => {
+            const response = await europeanaResponse(item);
 
-            assert(!Object.keys(itemResponse).includes('html'));
+            assert.equal(response.html, null);
           });
         });
       });
@@ -160,16 +174,16 @@ describe('response', () => {
               ]
             };
 
-            it('defaults to ebucore dimensions', () => {
-              assertWidthAndHeight(response.item(item), 1200, 900);
+            it('defaults to ebucore dimensions', async() => {
+              assertWidthAndHeight(await europeanaResponse(item), 1200, 900);
             });
 
-            it('scales to fit maxWidth', () => {
-              assertWidthAndHeight(response.item(item, { maxWidth: 200, maxHeight: 225 }), 200, 150);
+            it('scales to fit maxWidth', async() => {
+              assertWidthAndHeight(await europeanaResponse(item, { maxWidth: 200, maxHeight: 225 }), 200, 150);
             });
 
-            it('scales to fit maxHeight', () => {
-              assertWidthAndHeight(response.item(item, { maxWidth: 400, maxHeight: 100 }), 133, 100);
+            it('scales to fit maxHeight', async() => {
+              assertWidthAndHeight(await europeanaResponse(item, { maxWidth: 400, maxHeight: 100 }), 133, 100);
             });
           });
 
@@ -193,16 +207,16 @@ describe('response', () => {
               ]
             };
 
-            it('defaults to 400x225', () => {
-              assertWidthAndHeight(response.item(item), 400, 225);
+            it('defaults to 400x225', async() => {
+              assertWidthAndHeight(await europeanaResponse(item), 400, 225);
             });
 
-            it('scales to fit maxWidth', () => {
-              assertWidthAndHeight(response.item(item, { maxWidth: 200, maxHeight: 225 }), 200, 113);
+            it('scales to fit maxWidth', async() => {
+              assertWidthAndHeight(await europeanaResponse(item, { maxWidth: 200, maxHeight: 225 }), 200, 113);
             });
 
-            it('scales to fit maxHeight', () => {
-              assertWidthAndHeight(response.item(item, { maxWidth: 400, maxHeight: 100 }), 178, 100);
+            it('scales to fit maxHeight', async() => {
+              assertWidthAndHeight(await europeanaResponse(item, { maxWidth: 400, maxHeight: 100 }), 178, 100);
             });
           });
         });
@@ -227,16 +241,16 @@ describe('response', () => {
             ]
           };
 
-          it('defaults to 400x225', () => {
-            assertWidthAndHeight(response.item(item), 400, 225);
+          it('defaults to 400x225', async() => {
+            assertWidthAndHeight(await europeanaResponse(item), 400, 225);
           });
 
-          it('scales to fit maxWidth', () => {
-            assertWidthAndHeight(response.item(item, { maxWidth: 200, maxHeight: 225 }), 200, 113);
+          it('scales to fit maxWidth', async() => {
+            assertWidthAndHeight(await europeanaResponse(item, { maxWidth: 200, maxHeight: 225 }), 200, 113);
           });
 
-          it('scales to fit maxHeight', () => {
-            assertWidthAndHeight(response.item(item, { maxWidth: 400, maxHeight: 100 }), 178, 100);
+          it('scales to fit maxHeight', async() => {
+            assertWidthAndHeight(await europeanaResponse(item, { maxWidth: 400, maxHeight: 100 }), 178, 100);
           });
         });
       });
@@ -261,10 +275,10 @@ describe('response', () => {
           ]
         };
 
-        it('should be omitted', () => {
-          const itemResponse = response.item(item);
+        it('should be null', async() => {
+          const response = await europeanaResponse(item);
 
-          assert(!Object.keys(itemResponse).includes('width'));
+          assert.equal(response.width, null);
         });
       });
     });
@@ -290,24 +304,24 @@ describe('response', () => {
         context('and title is available in that language', () => {
           const options = { language: 'nl' };
 
-          it('should use title in that language', () => {
+          it('should use title in that language', async() => {
             const expected = 'Title in Dutch';
 
-            const title = response.item(item, options).title;
+            const response = await europeanaResponse(item, options);
 
-            assert.equal(title, expected);
+            assert.equal(response.title, expected);
           });
         });
 
         context('but title is unavailable in that language', () => {
           const options = { language: 'de' };
 
-          it('should use the first title', () => {
+          it('should use the first title', async() => {
             const expected = 'Title in English';
 
-            const title = response.item(item, options).title;
+            const response = await europeanaResponse(item, options);
 
-            assert.equal(title, expected);
+            assert.equal(response.title, expected);
           });
         });
       });
@@ -331,12 +345,12 @@ describe('response', () => {
           ]
         };
 
-        it('should be title from Europeana proxy', () => {
+        it('should be title from Europeana proxy', async() => {
           const expected = 'Europeana proxy title';
 
-          const title = response.item(item).title;
+          const response = await europeanaResponse(item);
 
-          assert.equal(title, expected);
+          assert.equal(response.title, expected);
         });
       });
 
@@ -357,12 +371,12 @@ describe('response', () => {
             ]
           };
 
-          it('should be title from provider proxy', () => {
+          it('should be title from provider proxy', async() => {
             const expected = 'Provider proxy title';
 
-            const title = response.item(item).title;
+            const response = await europeanaResponse(item);
 
-            assert.equal(title, expected);
+            assert.equal(response.title, expected);
           });
         });
 
@@ -379,10 +393,10 @@ describe('response', () => {
             ]
           };
 
-          it('should be omitted', () => {
-            const itemResponse = response.item(item);
+          it('should be null', async() => {
+            const response = await europeanaResponse(item);
 
-            assert(!Object.keys(itemResponse).includes('title'));
+            assert.equal(response.title, null);
           });
         });
       });
@@ -408,12 +422,12 @@ describe('response', () => {
           ]
         };
 
-        it('should be description from Europeana proxy', () => {
+        it('should be description from Europeana proxy', async() => {
           const expected = 'Europeana proxy description';
 
-          const title = response.item(item).description;
+          const response = await europeanaResponse(item);
 
-          assert.equal(title, expected);
+          assert.equal(response.description, expected);
         });
       });
 
@@ -434,12 +448,12 @@ describe('response', () => {
             ]
           };
 
-          it('should be description from provider proxy', () => {
+          it('should be description from provider proxy', async() => {
             const expected = 'Provider proxy description';
 
-            const title = response.item(item).description;
+            const response = await europeanaResponse(item);
 
-            assert.equal(title, expected);
+            assert.equal(response.description, expected);
           });
         });
 
@@ -456,17 +470,17 @@ describe('response', () => {
             ]
           };
 
-          it('should be omitted', () => {
-            const itemResponse = response.item(item);
+          it('should be null', async() => {
+            const response = await europeanaResponse(item);
 
-            assert(!Object.keys(itemResponse).includes('description'));
+            assert.equal(response.description, null);
           });
         });
       });
     });
 
     describe('author_name', () => {
-      it('should be edm:dataProvider from the aggregation', () => {
+      it('should be edm:dataProvider from the aggregation', async() => {
         const item = {
           ...fixtures.items.template,
           aggregations: [
@@ -484,9 +498,9 @@ describe('response', () => {
         };
         const expected = 'Data Provider';
 
-        const authorName = response.item(item)['author_name'];
+        const response = await europeanaResponse(item);
 
-        assert.equal(authorName, expected);
+        assert.equal(response['author_name'], expected);
       });
     });
 
@@ -506,57 +520,57 @@ describe('response', () => {
           ]
         };
 
-        it('should be edm:isShownAt from aggregation', () => {
+        it('should be edm:isShownAt from aggregation', async() => {
           const expected = 'https://www.example.org/123/abc';
 
-          const authorUrl = response.item(item)['author_url'];
+          const response = await europeanaResponse(item);
 
-          assert.equal(authorUrl, expected);
+          assert.equal(response['author_url'], expected);
         });
       });
 
       context('when aggregation lacks edm:isShownAt', () => {
         const item = { ...fixtures.items.template };
 
-        it('should be omitted', () => {
-          const itemResponse = response.item(item);
+        it('should be null', async() => {
+          const response = await europeanaResponse(item);
 
-          assert(!Object.keys(itemResponse).includes('description'));
+          assert.equal(response.description, null);
         });
       });
     });
 
     describe('provider_name', () => {
-      it('should be "Europeana"', () => {
+      it('should be "Europeana"', async() => {
         const item = { ...fixtures.items.template };
         const expected = 'Europeana';
 
-        const providerName = response.item(item)['provider_name'];
+        const response = await europeanaResponse(item);
 
-        assert.equal(providerName, expected);
+        assert.equal(response['provider_name'], expected);
       });
     });
 
     describe('provider_url', () => {
       const item = { ...fixtures.items.template, about: '/123/abc' };
 
-      it('should be a Europeana website item page URL', () => {
+      it('should be a Europeana website item page URL', async() => {
         const expected = 'https://www.europeana.eu/item/123/abc';
 
-        const providerUrl = response.item(item)['provider_url'];
+        const response = await europeanaResponse(item);
 
-        assert.equal(providerUrl, expected);
+        assert.equal(response['provider_url'], expected);
       });
 
       context('when language option is provided', () => {
         const options = { language: 'fr' };
 
-        it('includes locale in URL', () => {
+        it('includes locale in URL', async() => {
           const expected = 'https://www.europeana.eu/fr/item/123/abc';
 
-          const providerUrl = response.item(item, options)['provider_url'];
+          const response = await europeanaResponse(item, options);
 
-          assert.equal(providerUrl, expected);
+          assert.equal(response['provider_url'], expected);
         });
       });
     });
@@ -584,12 +598,12 @@ describe('response', () => {
             ]
           };
 
-          it('should be edm:rights of edm:isShownBy', () => {
+          it('should be edm:rights of edm:isShownBy', async() => {
             const expected = 'http://rightsstatements.org/vocab/CNE/1.0/';
 
-            const rightsUrl = response.item(item)['rights_url'];
+            const response = await europeanaResponse(item);
 
-            assert.equal(rightsUrl, expected);
+            assert.equal(response['rights_url'], expected);
           });
         });
 
@@ -611,12 +625,12 @@ describe('response', () => {
             ]
           };
 
-          it('should be edm:rights of aggregation', () => {
+          it('should be edm:rights of aggregation', async() => {
             const expected = 'http://creativecommons.org/licenses/by-sa/4.0/';
 
-            const rightsUrl = response.item(item)['rights_url'];
+            const response = await europeanaResponse(item);
 
-            assert.equal(rightsUrl, expected);
+            assert.equal(response['rights_url'], expected);
           });
         });
       });
@@ -640,12 +654,12 @@ describe('response', () => {
           ]
         };
 
-        it('should be edm:rights of aggregation', () => {
+        it('should be edm:rights of aggregation', async() => {
           const expected = 'http://creativecommons.org/licenses/by-sa/4.0/';
 
-          const rightsUrl = response.item(item)['rights_url'];
+          const response = await europeanaResponse(item);
 
-          assert.equal(rightsUrl, expected);
+          assert.equal(response['rights_url'], expected);
         });
       });
     });
@@ -654,10 +668,10 @@ describe('response', () => {
       context('when edm:object is absent', () => {
         const item = { ...fixtures.items.template };
 
-        it('should be omitted', () => {
-          const itemResponse = response.item(item);
+        it('is null', async() => {
+          const response = await europeanaResponse(item);
 
-          assert(!Object.keys(itemResponse).includes('thumbnail_url'));
+          assert.equal(response['thumbnail_url'], null);
         });
       });
 
@@ -676,12 +690,12 @@ describe('response', () => {
           ]
         };
 
-        it('should be Europeana Thumbnail API URL', () => {
+        it('should be Europeana Thumbnail API URL', async() => {
           const expected = 'https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Fexample.org%2Fimage.jpeg';
 
-          const thumbnailUrl = response.item(item)['thumbnail_url'];
+          const response = await europeanaResponse(item);
 
-          assert(thumbnailUrl.includes(expected));
+          assert(response['thumbnail_url'].includes(expected));
         });
 
         describe('size', () => {
@@ -689,24 +703,24 @@ describe('response', () => {
             context('and maxWidth <= 200', () => {
               const options = { maxWidth: 150 };
 
-              it('should be "w200"', () => {
+              it('should be "w200"', async() => {
                 const expected = 'size=w200';
 
-                const thumbnailUrl = response.item(item, options)['thumbnail_url'];
+                const response = await europeanaResponse(item, options);
 
-                assert(thumbnailUrl.includes(expected));
+                assert(response['thumbnail_url'].includes(expected));
               });
             });
 
             context('and maxWidth > 200', () => {
               const options = { maxWidth: 500 };
 
-              it('should be "w400"', () => {
+              it('should be "w400"', async() => {
                 const expected = 'size=w400';
 
-                const thumbnailUrl = response.item(item, options)['thumbnail_url'];
+                const response = await europeanaResponse(item, options);
 
-                assert(thumbnailUrl.includes(expected));
+                assert(response['thumbnail_url'].includes(expected));
               });
             });
           });
@@ -714,12 +728,12 @@ describe('response', () => {
           context('when maxWidth is absent from options', () => {
             const options = { maxWidth: undefined };
 
-            it('should be "w200"', () => {
+            it('should be "w200"', async() => {
               const expected = 'size=w200';
 
-              const thumbnailUrl = response.item(item, options)['thumbnail_url'];
+              const response = await europeanaResponse(item, options);
 
-              assert(thumbnailUrl.includes(expected));
+              assert(response['thumbnail_url'].includes(expected));
             });
           });
         });
@@ -730,10 +744,10 @@ describe('response', () => {
       context('when edm:object is absent', () => {
         const item = { ...fixtures.items.template };
 
-        it('should be omitted', () => {
-          const itemResponse = response.item(item);
+        it('should be null', async() => {
+          const response = await europeanaResponse(item);
 
-          assert(!Object.keys(itemResponse).includes('thumbnail_width'));
+          assert.equal(response['thumbnail_width'], null);
         });
       });
 
@@ -756,24 +770,24 @@ describe('response', () => {
           context('and maxWidth <= 200', () => {
             const options = { maxWidth: 150 };
 
-            it('should be 200', () => {
+            it('should be 200', async() => {
               const expected = 200;
 
-              const thumbnailWidth = response.item(item, options)['thumbnail_width'];
+              const response = await europeanaResponse(item, options);
 
-              assert.equal(thumbnailWidth, expected);
+              assert.equal(response['thumbnail_width'], expected);
             });
           });
 
           context('and maxWidth > 200', () => {
             const options = { maxWidth: 500 };
 
-            it('should be 400', () => {
+            it('should be 400', async() => {
               const expected = 400;
 
-              const thumbnailWidth = response.item(item, options)['thumbnail_width'];
+              const response = await europeanaResponse(item, options);
 
-              assert.equal(thumbnailWidth, expected);
+              assert.equal(response['thumbnail_width'], expected);
             });
           });
         });
@@ -781,12 +795,12 @@ describe('response', () => {
         context('when maxWidth is absent from options', () => {
           const options = { maxWidth: undefined };
 
-          it('should be 200', () => {
+          it('should be 200', async() => {
             const expected = 200;
 
-            const thumbnailWidth = response.item(item, options)['thumbnail_width'];
+            const response = await europeanaResponse(item, options);
 
-            assert.equal(thumbnailWidth, expected);
+            assert.equal(response['thumbnail_width'], expected);
           });
         });
       });
