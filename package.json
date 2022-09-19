@@ -7,7 +7,7 @@
     "lint": "eslint --ext .js --ignore-path .gitignore .",
     "lint:fix": "npm run lint -- --fix",
     "start": "node src/server.js",
-    "test": "mocha"
+    "test": "mocha test/*.spec.js test/**/*.spec.js"
   },
   "repository": {
     "type": "git",

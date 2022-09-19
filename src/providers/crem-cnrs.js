@@ -11,7 +11,7 @@ export default {
     type: 'rich',
     width: 361,
     height: 250,
-    providerName: 'CREM-CNRS',
-    providerUrl: 'https://archives.crem-cnrs.fr/'
+    'provider_name': 'CREM-CNRS',
+    'provider_url': 'https://archives.crem-cnrs.fr/'
   }
 };

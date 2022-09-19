@@ -11,7 +11,7 @@ export default {
     type: 'video',
     width: 500,
     height: 281,
-    providerName: 'CCMA',
-    providerUrl: 'https://www.ccma.cat/'
+    'provider_name': 'CCMA',
+    'provider_url': 'https://www.ccma.cat/'
   }
 };

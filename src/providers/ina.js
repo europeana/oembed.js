@@ -12,7 +12,7 @@ export default {
     type: 'video',
     width: 620,
     height: 349,
-    providerName: 'Ina.fr',
-    providerUrl: 'https://www.ina.fr/'
+    'provider_name': 'Ina.fr',
+    'provider_url': 'https://www.ina.fr/'
   }
 };
