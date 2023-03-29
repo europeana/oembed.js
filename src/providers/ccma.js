@@ -5,7 +5,7 @@ export default {
 
   id: (url) => (new URL(url)).pathname.split('/').slice(-2, -1),
 
-  src: (id) => `http://www.ccma.cat/video/embed/${id}/`,
+  src: (id) => `https://www.ccma.cat/video/embed/${id}/`,
 
   response: {
     type: 'video',

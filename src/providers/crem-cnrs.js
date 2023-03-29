@@ -5,7 +5,7 @@ export default {
 
   id: (url) => (new URL(url)).pathname.split('/').slice(-2, -1),
 
-  src: (id) => `http://archives.crem-cnrs.fr/archives/items/${id}/player/346x130/`,
+  src: (id) => `https://archives.crem-cnrs.fr/archives/items/${id}/player/346x130/`,
 
   response: {
     type: 'rich',
