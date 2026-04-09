@@ -6,12 +6,12 @@ export default {
 
   id: (url) => (new URL(url)).pathname.match(/\/video\/([^/]+)/)[1],
 
-  src: (id) => `https://player.ina.fr/player/embed/${id}/1/1b0bd203fbcd702f9bc9b10ac3d0fc21/620/349/0`,
+  src: (id) => `https://player.ina.fr/embed/${id}`,
 
   response: {
     type: 'video',
-    width: 620,
-    height: 349,
+    width: 768,
+    height: 576,
     'provider_name': 'Ina.fr',
     'provider_url': 'https://www.ina.fr/'
   }
