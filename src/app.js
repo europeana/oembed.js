@@ -11,7 +11,7 @@ import compression from 'compression';
 import config from './config.js';
 import handler from './handler.js';
 
-import packageLock from '../package-lock.json' assert { type: 'json' };
+import packageLock from '../package-lock.json' with { type: 'json' };
 const frameworkVersion = packageLock.packages['node_modules/express'].version;
 const serviceVersion = packageLock.version;
 

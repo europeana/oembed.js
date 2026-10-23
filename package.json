@@ -20,8 +20,8 @@
   },
   "homepage": "https://github.com/europeana/oembed.js#readme",
   "engines": {
-    "node": "^16",
-    "npm": "^8"
+    "node": "^24.0.0",
+    "npm": "^11"
   },
   "dependencies": {
     "axios": "^0.27.2",
@@ -29,7 +29,7 @@
     "cors": "^2.8.5",
     "cross-env": "^7.0.2",
     "dotenv": "^16.0.2",
-    "elastic-apm-node": "^3.6.1",
+    "elastic-apm-node": "^3.52.2",
     "express": "^4.17.1",
     "lodash.flatten": "^4.4.0",
     "lodash.isnull": "^3.0.0",

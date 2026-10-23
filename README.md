@@ -44,8 +44,9 @@ docker build -t europeana/oembed .
 
 ```
 docker run -it \
+  --rm --name europeana_oembed \
   --env-file .env \
-  -p 3000:3000 \
+  -p 8080:8080 \
   europeana/oembed
 ```
 
